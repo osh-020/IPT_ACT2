@@ -1,8 +1,18 @@
 <?php
 $uploadDir = __DIR__ . '/uploads/';
 $images = [];
+$metadata = array();
 
-// Get all images from uploads folder
+// Load metadata
+$metadataFile = $uploadDir . 'metadata.json';
+if (file_exists($metadataFile)) {
+    $metadata = json_decode(file_get_contents($metadataFile), true);
+    if (!is_array($metadata)) {
+        $metadata = array();
+    }
+}
+
+// Get all images from uploads folder with metadata
 if (is_dir($uploadDir)) {
     $files = scandir($uploadDir);
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
@@ -11,13 +21,21 @@ if (is_dir($uploadDir)) {
         if ($file !== '.' && $file !== '..') {
             $fileExtension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             if (in_array($fileExtension, $allowedExtensions)) {
-                $images[] = $file;
+                // Get product name from metadata or use default
+                $productName = isset($metadata[$file]) ? $metadata[$file] : 'Image';
+                
+                $images[] = array(
+                    'filename' => $file,
+                    'productName' => $productName
+                );
             }
         }
     }
     
     // Sort images by name (most recent first)
-    rsort($images);
+    usort($images, function($a, $b) {
+        return strcmp($b['filename'], $a['filename']);
+    });
 }
 ?>
 
@@ -118,10 +136,23 @@ if (is_dir($uploadDir)) {
         }
 
         .gallery-item-name {
-            color: #47d4ff;
-            font-size: 12px;
+            color: #e8ff47;
+            font-size: 14px;
+            word-break: break-word;
+            margin-bottom: 5px;
+            max-height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gallery-item-filename {
+            color: #888;
+            font-size: 11px;
             word-break: break-all;
             margin-bottom: 8px;
+            max-height: 30px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .gallery-item-delete {
@@ -244,15 +275,18 @@ if (is_dir($uploadDir)) {
 
         <?php if (count($images) > 0): ?>
             <div class="gallery">
-                <?php foreach ($images as $image): ?>
+                <?php foreach ($images as $imageData): ?>
                     <div class="gallery-item">
-                        <img src="uploads/<?php echo urlencode($image); ?>" alt="<?php echo htmlspecialchars($image); ?>" onclick="openModal('uploads/<?php echo urlencode($image); ?>')">
+                        <img src="uploads/<?php echo urlencode($imageData['filename']); ?>" alt="<?php echo htmlspecialchars($imageData['productName']); ?>" onclick="openModal('uploads/<?php echo urlencode($imageData['filename']); ?>')">
                         <div class="gallery-item-info">
-                            <div class="gallery-item-name">
-                                <?php echo htmlspecialchars($image); ?>
+                            <div class="gallery-item-name" title="<?php echo htmlspecialchars($imageData['filename']); ?>">
+                                <strong><?php echo htmlspecialchars($imageData['productName']); ?></strong>
+                            </div>
+                            <div class="gallery-item-filename">
+                                <?php echo htmlspecialchars($imageData['filename']); ?>
                             </div>
                             <form method="POST" action="delete_pic.php" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this image?');">
-                                <input type="hidden" name="filename" value="<?php echo htmlspecialchars($image); ?>">
+                                <input type="hidden" name="filename" value="<?php echo htmlspecialchars($imageData['filename']); ?>">
                                 <button type="submit" class="gallery-item-delete">🗑️ Delete</button>
                             </form>
                         </div>

@@ -4,7 +4,7 @@ $errorMessage = '';
 $previewImage = '';
 
 // Handle file upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && isset($_POST['productName'])) {
     $file = $_FILES['image'];
     $fileName = $file['name'];
     $fileTmpName = $file['tmp_name'];
@@ -22,22 +22,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     } elseif ($fileSize > 5 * 1024 * 1024) { // 5MB limit
         $errorMessage = "File size must not exceed 5MB.";
     } else {
-        // Create unique filename
-        $newFileName = time() . '_' . rand(1000, 9999) . '.' . $fileExtension;
-        $uploadDir = __DIR__ . '/uploads/';
+        $productName = htmlspecialchars(trim($_POST['productName']));
         
-        // Create uploads directory if it doesn't exist
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $uploadPath = $uploadDir . $newFileName;
-
-        // Move uploaded file
-        if (move_uploaded_file($fileTmpName, $uploadPath)) {
-            $successMessage = "Image uploaded successfully!";
+        // Validate product name
+        if (empty($productName)) {
+            $errorMessage = "Product name is required.";
         } else {
-            $errorMessage = "Failed to upload image. Please try again.";
+            // Create unique filename
+            $newFileName = time() . '_' . rand(1000, 9999) . '.' . $fileExtension;
+            $uploadDir = __DIR__ . '/uploads/';
+            
+            // Create uploads directory if it doesn't exist
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $uploadPath = $uploadDir . $newFileName;
+            $metadataFile = $uploadDir . 'metadata.json';
+
+            // Move uploaded file
+            if (move_uploaded_file($fileTmpName, $uploadPath)) {
+                // Store product name in metadata
+                $metadata = array();
+                if (file_exists($metadataFile)) {
+                    $metadata = json_decode(file_get_contents($metadataFile), true);
+                    if (!is_array($metadata)) {
+                        $metadata = array();
+                    }
+                }
+                $metadata[$newFileName] = $productName;
+                file_put_contents($metadataFile, json_encode($metadata, JSON_PRETTY_PRINT));
+                
+                $successMessage = "Image uploaded successfully!";
+            } else {
+                $errorMessage = "Failed to upload image. Please try again.";
+            }
         }
     }
 }
@@ -120,6 +139,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
         }
 
         input[type="file"]:focus {
+            outline: none;
+            border-color: #e8ff47;
+            box-shadow: 0 0 10px rgba(232, 255, 71, 0.3);
+        }
+
+        input[type="text"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #1c1c21;
+            color: #f0f0f0;
+            border: 2px solid #2a2a32;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus {
             outline: none;
             border-color: #e8ff47;
             box-shadow: 0 0 10px rgba(232, 255, 71, 0.3);
@@ -220,6 +256,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
         <?php endif; ?>
 
         <form method="POST" enctype="multipart/form-data" id="uploadForm">
+            <div class="form-group">
+                <label for="productName">Product Name:</label>
+                <input type="text" id="productName" name="productName" placeholder="e.g., Gaming PC, Laptop, Monitor" required>
+                <p class="info-text">Enter the product name you want to display</p>
+            </div>
+
             <div class="form-group">
                 <label for="image">Select Image:</label>
                 <input type="file" id="image" name="image" accept="image/*" required>

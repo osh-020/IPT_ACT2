@@ -32,12 +32,13 @@ This image upload system consists of three main PHP files that work together to:
 
 ```
 practice/
-├── upload.php           # Image upload form with preview
+├── upload.php           # Image upload form with preview + product name
 ├── display_pic.php      # Gallery display page
 ├── delete_pic.php       # Delete handler
 ├── tutorial.php         # User tutorial (HTML)
 ├── tutorial.md          # This file - code documentation
-└── uploads/             # Folder where images are stored
+├── uploads/             # Folder where images are stored
+└── uploads/metadata.json # Stores product names for images
 ```
 
 ---
@@ -65,7 +66,7 @@ $previewImage = '';
 #### 2. Handle File Upload
 
 ```php
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && isset($_POST['productName'])) {
     $file = $_FILES['image'];
     $fileName = $file['name'];
     $fileTmpName = $file['tmp_name'];
@@ -76,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
 **Explanation:**
 - `$_SERVER['REQUEST_METHOD'] === 'POST'` - Check if form was submitted
 - `isset($_FILES['image'])` - Check if a file was uploaded
+- `isset($_POST['productName'])` - Check if product name was entered
 - Extract file information from the `$_FILES` superglobal:
   - `$file['name']` - Original filename from user's computer
   - `$file['tmp_name']` - Temporary location on server
@@ -158,12 +160,25 @@ if (!is_dir($uploadDir)) {
 - `0777` - File permissions (read/write/execute for all)
 - `true` - Create parent directories if needed (recursive)
 
-#### 7. Move Uploaded File
+#### 7. Move Uploaded File & Store Product Name
 
 ```php
 $uploadPath = $uploadDir . $newFileName;
+$metadataFile = $uploadDir . 'metadata.json';
 
+// Move uploaded file
 if (move_uploaded_file($fileTmpName, $uploadPath)) {
+    // Store product name in metadata
+    $metadata = array();
+    if (file_exists($metadataFile)) {
+        $metadata = json_decode(file_get_contents($metadataFile), true);
+        if (!is_array($metadata)) {
+            $metadata = array();
+        }
+    }
+    $metadata[$newFileName] = $productName;
+    file_put_contents($metadataFile, json_encode($metadata, JSON_PRETTY_PRINT));
+    
     $successMessage = "Image uploaded successfully!";
 } else {
     $errorMessage = "Failed to upload image. Please try again.";
@@ -172,14 +187,31 @@ if (move_uploaded_file($fileTmpName, $uploadPath)) {
 
 **Explanation:**
 - `move_uploaded_file()` - Move file from temp location to permanent location
-- Parameters: source (temp file), destination (uploads folder)
-- Returns `true` on success, `false` on failure
-- Show appropriate message
+- `metadata.json` - JSON file that stores product names
+- Load existing metadata (if it exists)
+- Add new entry: `$metadata[$newFileName] = $productName`
+- Save updated metadata back to file using `json_encode()`
+- `JSON_PRETTY_PRINT` - Makes JSON readable for debugging
+
+**Example metadata.json:**
+```json
+{
+    "1711500000_4567.jpg": "Gaming PC",
+    "1711500001_8901.jpg": "Laptop - 16GB RAM",
+    "1711500002_3456.jpg": "4K Monitor"
+}
+```
 
 ### HTML Form Structure
 
 ```html
 <form method="POST" enctype="multipart/form-data" id="uploadForm">
+    <div class="form-group">
+        <label for="productName">Product Name:</label>
+        <input type="text" id="productName" name="productName" placeholder="e.g., Gaming PC, Laptop, Monitor" required>
+        <p class="info-text">Enter the product name you want to display</p>
+    </div>
+
     <div class="form-group">
         <label for="image">Select Image:</label>
         <input type="file" id="image" name="image" accept="image/*" required>
@@ -196,6 +228,8 @@ if (move_uploaded_file($fileTmpName, $uploadPath)) {
 
 **Key Attributes:**
 - `method="POST"` - Send form data via POST (required for file uploads)
+- Product name field is required before uploading
+- File input restricted to images only with `accept="image/*"`
 - `enctype="multipart/form-data"` - **CRITICAL** - Allows file upload in form
 - `accept="image/*"` - Restrict file picker to images only
 - `required` - Field must be filled before submission
@@ -274,13 +308,24 @@ imageInput.addEventListener('change', function(e) {
 ### Purpose
 Reads uploaded images from the uploads folder and displays them in a responsive gallery with modal viewer and delete functionality.
 
-### Step 1: Read Files from Uploads Folder
+### Step 1: Read Files & Load Metadata
 
 ```php
 <?php
 $uploadDir = __DIR__ . '/uploads/';
 $images = [];
+$metadata = array();
 
+// Load metadata
+$metadataFile = $uploadDir . 'metadata.json';
+if (file_exists($metadataFile)) {
+    $metadata = json_decode(file_get_contents($metadataFile), true);
+    if (!is_array($metadata)) {
+        $metadata = array();
+    }
+}
+
+// Get all images from uploads folder with metadata
 if (is_dir($uploadDir)) {
     $files = scandir($uploadDir);
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
@@ -289,47 +334,105 @@ if (is_dir($uploadDir)) {
         if ($file !== '.' && $file !== '..') {
             $fileExtension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             if (in_array($fileExtension, $allowedExtensions)) {
-                $images[] = $file;
+                // Get product name from metadata or use default
+                $productName = isset($metadata[$file]) ? $metadata[$file] : 'Image';
+                
+                $images[] = array(
+                    'filename' => $file,
+                    'productName' => $productName
+                );
             }
         }
     }
     
-    rsort($images);
+    // Sort images by name (most recent first)
+    usort($images, function($a, $b) {
+        return strcmp($b['filename'], $a['filename']);
+    });
 }
 ```
 
 **Explanation:**
 
-- `scandir($uploadDir)` - Get list of all files and folders
-  - Returns array including `.` (current dir) and `..` (parent dir)
-  - Must filter these out: `if ($file !== '.' && $file !== '..')`
+1. **Load Metadata File:**
+   - Check if `metadata.json` exists
+   - Decode JSON to PHP array
+   - Store product names in `$metadata` array
 
-- Loop through files:
-  - Extract extension
-  - Check if it's an image file
-  - Add to `$images` array if valid
+2. **Scan Directory:**
+   - `scandir($uploadDir)` - Get list of all files and folders
+   - Returns array including `.` (current dir) and `..` (parent dir)
+   - Must filter these out: `if ($file !== '.' && $file !== '..')`
 
-- `rsort($images)` - Sort in reverse order (newest first)
+3. **Filter and Combine Data:**
+   - Extract file extension
+   - Check if it's an image file
+   - Look up product name from metadata
+   - Use "Image" as default if product name not found
+   - Create array with both filename and productName
 
-### Step 2: Display Gallery Grid
+4. **Sort Images:**
+   - `usort()` - Sort using custom comparison function
+   - `strcmp($b['filename'], $a['filename'])` - Sort in reverse (newest first)
+
+5. **Result - Array Structure:**
+   ```php
+   $images = [
+       [
+           'filename' => '1711500000_4567.jpg',
+           'productName' => 'Gaming PC'
+       ],
+       [
+           'filename' => '1711500001_8901.jpg',
+           'productName' => 'Laptop - 16GB RAM'
+       ]
+   ]
+   ```
+
+### Step 2: Display Gallery Grid with Product Names
 
 ```html
 <div class="gallery">
-    <?php foreach ($images as $image): ?>
+    <?php foreach ($images as $imageData): ?>
         <div class="gallery-item">
-            <img src="uploads/<?php echo urlencode($image); ?>" 
-                 alt="<?php echo htmlspecialchars($image); ?>" 
-                 onclick="openModal('uploads/<?php echo urlencode($image); ?>')">
+            <img src="uploads/<?php echo urlencode($imageData['filename']); ?>" 
+                 alt="<?php echo htmlspecialchars($imageData['productName']); ?>" 
+                 onclick="openModal('uploads/<?php echo urlencode($imageData['filename']); ?>')">
             
             <div class="gallery-item-info">
                 <div class="gallery-item-name">
-                    <?php echo htmlspecialchars($image); ?>
+                    <strong><?php echo htmlspecialchars($imageData['productName']); ?></strong>
+                </div>
+                
+                <div class="gallery-item-filename">
+                    <?php echo htmlspecialchars($imageData['filename']); ?>
                 </div>
                 
                 <form method="POST" action="delete_pic.php">
-                    <input type="hidden" name="filename" value="<?php echo htmlspecialchars($image); ?>">
+                    <input type="hidden" name="filename" value="<?php echo htmlspecialchars($imageData['filename']); ?>">
                     <button type="submit" class="gallery-item-delete">🗑️ Delete</button>
                 </form>
+            </div>
+        </div>
+    <?php endforeach; ?>
+</div>
+```
+
+**Layout Structure:**
+- **Gallery Item:**
+  - Image thumbnail at top
+  - Gallery item info section below
+  
+- **Info Section (below image):**
+  - Product name in **yellow** and **bold** (primary display)
+  - Filename in **gray** (secondary - shows actual file)
+  - Delete button
+
+**Key Changes:**
+- `$imageData['productName']` - Display product name prominently
+- `$imageData['filename']` - Show technical filename for reference
+- Product name is bold and in yellow (catches user's attention)
+- Filename is subtle gray text
             </div>
         </div>
     <?php endforeach; ?>
@@ -446,6 +549,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['filename'])) {
     // Validate filename to prevent directory traversal
     if (basename($filePath) === basename($filename) && file_exists($filePath)) {
         if (unlink($filePath)) {
+            // Remove from metadata file
+            $metadataFile = $uploadDir . 'metadata.json';
+            if (file_exists($metadataFile)) {
+                $metadata = json_decode(file_get_contents($metadataFile), true);
+                if (is_array($metadata) && isset($metadata[$filename])) {
+                    unset($metadata[$filename]);
+                    file_put_contents($metadataFile, json_encode($metadata, JSON_PRETTY_PRINT));
+                }
+            }
             $_SESSION['message'] = 'Image deleted successfully!';
         }
     }
@@ -456,6 +568,23 @@ header('Location: display_pic.php');
 exit;
 ?>
 ```
+
+**Explanation:**
+
+1. **Remove Image File:**
+   - `unlink($filePath)` - Delete image from uploads folder
+
+2. **Remove from Metadata:**
+   - Load `metadata.json` file
+   - Decode JSON to array
+   - Check if product name exists for this image
+   - Remove entry: `unset($metadata[$filename])`
+   - Re-encode and save updated metadata
+
+**Why Remove from Metadata?**
+- Keeps metadata file clean and accurate
+- Prevents orphaned product names
+- Metadata stays in sync with actual images
 
 ### Security Analysis
 
@@ -516,32 +645,58 @@ exit;
 ```
 1. User visits upload.php
    ↓
-2. Selects image file
+2. Enters product name + selects image
    ↓ (JavaScript)
 3. Shows real-time preview
    ↓
 4. User clicks "Upload Image"
    ↓ (Browser sends POST request)
 5. upload.php processes:
+   - Validates product name ✓
    - Validates file type ✓
    - Validates file size ✓
    - Creates unique filename
    - Moves file to uploads/ ✓
+   - Stores product name in metadata.json ✓
    ↓
 6. Shows success message
    ↓
 7. User clicks "View Gallery"
    ↓
 8. display_pic.php:
+   - Loads metadata.json
    - Reads uploads/ folder
-   - Lists all images
+   - Matches filenames with product names
    - Shows gallery grid
    ↓
 9. User can:
    a) Click image → view full size in modal
    b) Click delete → delete_pic.php
-      → removes file from server
+      → removes file from uploads/
+      → removes product name from metadata.json
       → redirects back to gallery
+
+```
+
+**Data Flow Example (Product Name "Gaming PC"):**
+
+```
+upload.php:
+  productName = "Gaming PC"
+  filename = "1711500000_4567.jpg"
+  ↓
+  metadata.json: { "1711500000_4567.jpg": "Gaming PC" }
+  ↓
+display_pic.php:
+  Reads metadata.json
+  Loads image: 1711500000_4567.jpg
+  Displays product name: "Gaming PC"
+  ↓
+Gallery shows:
+  [Image Thumbnail]
+  Gaming PC
+  1711500000_4567.jpg
+  [Delete Button]
 
 ```
 
@@ -711,15 +866,53 @@ $stmt->close();
 
 ## Summary
 
-| Concept | Purpose | Security |
+| Concept | Purpose | Security/Benefit |
 |---------|---------|----------|
 | **Dual Validation** | Check file type twice | Prevents malicious uploads |
 | **Unique Filenames** | Avoid conflicts | Prevents overwrites & attacks |
 | **basename()** | Extract only filename | Prevents directory traversal |
 | **htmlspecialchars()** | Escape HTML | Prevents XSS attacks |
 | **File Size Check** | Limit uploads | Prevents DoS attacks |
-| **FileReader API** | Show preview | Improves UX |
+| **Product Names** | Human-readable labels | Improves gallery UX |
+| **Metadata.json** | Store product names | JSON-based no-database solution |
+| **FileReader API** | Show preview | Better UX |
 | **Modal Viewer** | View full size | Better UX |
+
+---
+
+## Metadata Storage (Product Names)
+
+### How Product Names are Stored
+
+**File: `uploads/metadata.json`**
+
+```json
+{
+    "1711500000_4567.jpg": "Gaming PC",
+    "1711500001_8901.jpg": "Laptop - 16GB RAM",
+    "1711500002_3456.jpg": "4K Monitor"
+}
+```
+
+**Format:**
+- Key: Filename (as stored on server)
+- Value: Product name (entered by user)
+
+### When Metadata is Created
+- ✅ First upload creates empty `metadata.json`
+- ✅ Each upload adds new entry
+- ✅ File is created automatically if doesn't exist
+
+### When Metadata is Updated
+- **Upload:** New product name added
+- **Delete:** Product name removed (file cleanup)
+
+### Advantages of Metadata.json Approach
+- ✅ No database required
+- ✅ Simple JSON format (human readable)
+- ✅ Easy to backup (single file)
+- ✅ No dependencies on database server
+- ✅ Can be manually edited if needed
 
 ---
 
@@ -727,6 +920,7 @@ $stmt->close();
 
 ### Key PHP Functions Used
 - `$_FILES` - Access uploaded files
+- `$_POST` - Access form data (including product name)
 - `move_uploaded_file()` - Move file to permanent location
 - `scandir()` - List directory contents
 - `unlink()` - Delete file
@@ -736,6 +930,11 @@ $stmt->close();
 - `in_array()` - Check if value exists in array
 - `urlencode()` - Encode URL special characters
 - `htmlspecialchars()` - Escape HTML characters
+- `json_encode()` - Convert array to JSON string
+- `json_decode()` - Convert JSON string to array
+- `file_exists()` - Check if file exists
+- `file_get_contents()` - Read entire file into string
+- `file_put_contents()` - Write string to file
 
 ### Key JavaScript Functions Used
 - `addEventListener()` - Attach event handler
