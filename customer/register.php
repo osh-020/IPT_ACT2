@@ -92,7 +92,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $success = true;
             $fname = $age = $gender = $civil_status = $mobile_number = $address = $zip_code = $email = $username = '';
         } catch (mysqli_sql_exception $e){
-            $errors[] = "Username already exists.";
+            $error_msg = $e->getMessage();
+            
+            // Check for duplicate entry errors
+            if (strpos($error_msg, 'username') !== false) {
+                $errors[] = "Username already exists. Please choose a different username.";
+            } elseif (strpos($error_msg, 'email') !== false) {
+                $errors[] = "Email already exists. Please use a different email address.";
+            } elseif (strpos($error_msg, 'Duplicate') !== false || $e->getCode() == 1062) {
+                $errors[] = "This username or email is already registered.";
+            } else {
+                $errors[] = "An error occurred during registration. Please try again.";
+            }
         }
     }
 }
@@ -206,7 +217,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 </div>
             </div>
 
-            <button type="submit">Register</button>
+            <button type="submit">Register</button><br><br>
+            <p>Already have an account? <a href="../login.php">Log in here</a>.</p>
         </form>
     </div>
 
