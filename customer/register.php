@@ -6,9 +6,7 @@ include("../includes/db_connect.php");
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
     
-    $fname = $_POST['fname'];
-    $mname = $_POST['mname'];
-    $lname = $_POST['lname'];
+    $fname = $_POST['full_name'];
     $age = $_POST['age'];
     $gender = $_POST['gender'];
     $civil_status = $_POST['civil_status'];
@@ -20,11 +18,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $password = $_POST['password'];
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO `users`(`first_name`, `middle_name`, `last_name`, `age`, `gender`, `civil_status`, `mobile_number`, `address`, `zip_code`, `email`, `username`, `password`)
+    $sql = "INSERT INTO `users`(`full_name`, `age`, `gender`, `civil_status`, `mobile_number`, `address`, `zip_code`, `email`, `username`, `password`)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, 'sssissssssss', $fname, $mname, $lname, $age, $gender, $civil_status, $mobile_number, $address, $zip_code, $email, $username, $hashed_password);
+    mysqli_stmt_bind_param($stmt, 'sissssssss', $fname, $age, $gender, $civil_status, $mobile_number, $address, $zip_code, $email, $username, $hashed_password);
 
     try{
         mysqli_stmt_execute($stmt);
