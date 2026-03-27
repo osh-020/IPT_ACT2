@@ -1,8 +1,19 @@
 <?php
+session_start();
 include ("../includes/db_connect.php");
 
 $successMessage = '';
 $errorMessage = '';
+
+// Check for session success message from edit_product.php
+if (isset($_SESSION['successMessage'])) {
+    $successMessage = $_SESSION['successMessage'];
+    unset($_SESSION['successMessage']); // Clear it after retrieving
+}
+
+// Get search and filter parameters
+$searchQuery = isset($_GET['search']) ? htmlspecialchars(trim($_GET['search'])) : '';
+$filterCategory = isset($_GET['category']) ? htmlspecialchars(trim($_GET['category'])) : '';
 
 // Handle delete product
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['delete_id'])) {
@@ -35,13 +46,38 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['delete_id'])) {
     }
 }
 
-// Fetch all products
-$query = "SELECT * FROM products ORDER BY created_at DESC";
+// Fetch all products with search and filter
+$query = "SELECT * FROM products WHERE 1=1";
+
+// Add search filter
+if (!empty($searchQuery)) {
+    $escapedSearch = $conn->real_escape_string("%$searchQuery%");
+    $query .= " AND (name LIKE '$escapedSearch' OR description LIKE '$escapedSearch' OR brand LIKE '$escapedSearch')";
+}
+
+// Add category filter
+if (!empty($filterCategory)) {
+    $escapedCategory = $conn->real_escape_string($filterCategory);
+    $query .= " AND category = '$escapedCategory'";
+}
+
+$query .= " ORDER BY created_at DESC";
+
 $result = $conn->query($query);
 $products = [];
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $products[] = $row;
+    }
+}
+
+// Fetch all unique categories for the filter dropdown
+$categoryQuery = "SELECT DISTINCT category FROM products ORDER BY category";
+$categoryResult = $conn->query($categoryQuery);
+$categories = [];
+if ($categoryResult) {
+    while ($row = $categoryResult->fetch_assoc()) {
+        $categories[] = $row['category'];
     }
 }
 
@@ -74,6 +110,34 @@ if ($result) {
 
         <div class="action-buttons">
             <a href="upload_product.php" class="btn-upload">+ Add New Product</a>
+        </div>
+
+        <div class="search-filter-section">
+            <form method="GET" class="search-form">
+                <div class="search-group">
+                    <div class="search-wrapper">
+                        <input type="text" name="search" placeholder="Search by name, description, or brand..." 
+                               value="<?php echo htmlspecialchars($searchQuery); ?>" class="search-input">
+                        <button type="submit" class="btn-search-icon">🔍</button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <select name="category" class="category-filter">
+                        <option value="">All Categories</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo htmlspecialchars($cat); ?>" 
+                                    <?php echo ($filterCategory === $cat) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($cat); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <?php if (!empty($searchQuery) || !empty($filterCategory)): ?>
+                    <a href="manage_product.php" class="btn-clear">Clear Filters</a>
+                <?php endif; ?>
+            </form>
         </div>
 
         <?php if (count($products) > 0): ?>

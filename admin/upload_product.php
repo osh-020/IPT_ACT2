@@ -117,7 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_FILES['image'])) {
             </div>
 
             <div class="preview-container" id="previewContainer">
-                <p class="preview-label">Image Preview:</p>
+                <div class="preview-header">
+                    <p class="preview-label">Image Preview:</p>
+                    <button type="button" id="removeImageBtn" class="remove-btn" title="Remove image">✕</button>
+                </div>
                 <img id="previewImage" alt="Image Preview">
             </div>
             <div class="form-group">
@@ -154,7 +157,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_FILES['image'])) {
 
            
 
-            <button type="submit">Upload Product</button>
+            <div class="button-group">
+                <button type="submit">Upload Product</button>
+                <a href="manage_product.php" class="btn-cancel">View Products</a>
+            </div>
         </form>
     </div>
 
@@ -162,6 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_FILES['image'])) {
         const imageInput = document.getElementById('image');
         const previewContainer = document.getElementById('previewContainer');
         const previewImage = document.getElementById('previewImage');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const productForm = document.getElementById('productForm');
 
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -193,6 +201,23 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_FILES['image'])) {
                 reader.readAsDataURL(file);
             } else {
                 previewContainer.classList.remove('show');
+            }
+        });
+
+        // Remove image button functionality
+        removeImageBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            imageInput.value = '';
+            previewImage.src = '';
+            previewContainer.classList.remove('show');
+        });
+
+        // Form submission validation
+        productForm.addEventListener('submit', function(e) {
+            if (imageInput.files.length === 0) {
+                e.preventDefault();
+                alert('Please select an image before uploading.');
+                imageInput.focus();
             }
         });
     </script>

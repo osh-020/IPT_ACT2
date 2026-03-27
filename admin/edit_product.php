@@ -1,4 +1,5 @@
 <?php
+session_start();
 include ("../includes/db_connect.php");
 
 $successMessage = '';
@@ -97,17 +98,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && $product) {
             $stmt = $conn->prepare("UPDATE products SET name = ?, description = ?, price = ?, category = ?, brand = ?, stock = ?, image = ? WHERE id = ?");
             
             if ($stmt) {
-                $stmt->bind_param("ssddssi", $productName, $description, $price, $category, $brand, $stock, $imageName, $productId);
+                $stmt->bind_param("ssdsissi", $productName, $description, $price, $category, $brand, $stock, $imageName, $productId);
                 
                 if ($stmt->execute()) {
-                    $successMessage = "Product updated successfully!";
-                    // Refresh product data
-                    $stmt2 = $conn->prepare("SELECT * FROM products WHERE id = ?");
-                    $stmt2->bind_param("i", $productId);
-                    $stmt2->execute();
-                    $result2 = $stmt2->get_result();
-                    $product = $result2->fetch_assoc();
-                    $stmt2->close();
+                    // Set session message and redirect to manage products
+                    $_SESSION['successMessage'] = "Product updated successfully!";
+                    header("Location: manage_product.php");
+                    exit();
                 } else {
                     $errorMessage = "Failed to update product. Please try again.";
                 }
@@ -153,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && $product) {
                     <input type="file" id="image" name="image" accept="image/*">
                 </div>
 
-                <div class="preview-container" id="previewContainer">
+                <div class="preview-container show" id="previewContainer">
                     <p class="preview-label">Current Image:</p>
                     <img id="previewImage" src="./uploads/<?php echo htmlspecialchars($product['image']); ?>" 
                          alt="<?php echo htmlspecialchars($product['name']); ?>"
