@@ -181,20 +181,6 @@ ALTER TABLE `order_items`
 -- Sample User Accounts for Testing
 -- Passwords are hashed using bcrypt
 
--- User 1: John Doe
--- Password: Test1234
-INSERT INTO `users` (`full_name`, `email`, `username`, `password`, `age`, `gender`, `civil_status`, `mobile_number`, `address`, `zip_code`) 
-VALUES ('John Doe', 'john@example.com', 'johndoe', '$2y$10$mZLa8Pys1QsGPv.D4N0vPeI4KXR/BHLbXb9d5Z8y7q5k4K3J2K9Jm', 28, 'Male', 'Single', '09123456789', '123 Main Street, Lingayen, Pangasinan', '2401');
-
--- User 2: Maria Santos
--- Password: Password123
-INSERT INTO `users` (`full_name`, `email`, `username`, `password`, `age`, `gender`, `civil_status`, `mobile_number`, `address`, `zip_code`) 
-VALUES ('Maria Santos', 'maria@example.com', 'mariasantos', '$2y$10$d5PYk8XvZqR2B3n7L9mXxOK4j5L6K8Q2W9E5R7T2U4V6W8X9Y0Z1b', 32, 'Female', 'Married', '09198765432', '456 Oak Avenue, Dagupan, Pangasinan', '2400');
-
--- User 3: Admin Test User
--- Password: Admin2024
-INSERT INTO `users` (`full_name`, `email`, `username`, `password`, `age`, `gender`, `civil_status`, `mobile_number`, `address`, `zip_code`) 
-VALUES ('Admin User', 'admin@computronium.ph', 'admin', '$2y$10$GQwN8/W0bK3xL4m5N6o7pQ8r9S0t1U2v3W4X5Y6Z7A8B9C0D1E2F3', 35, 'Male', 'Single', '09111111111', '789 Tech Drive, Lingayen, Pangasinan', '2401');
 
 -- =====================================================
 -- SAMPLE DATA - PRODUCTS
