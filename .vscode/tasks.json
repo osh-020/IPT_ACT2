@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Create SERP Search System",
+			"type": "shell",
+			"command": "echo 'Creating SERP search system for manage products'",
+			"group": "build"
+		}
+	]
+}

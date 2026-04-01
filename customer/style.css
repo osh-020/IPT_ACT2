@@ -8,7 +8,7 @@
    REGISTER PAGE - BASE STYLES
    =============================================== */
 
-body {
+#body {
     font-family: Arial, sans-serif;
     background: #0d0d0f;
     padding: 20px;
@@ -140,12 +140,13 @@ button:hover {
 }
 
 .register-page p{
-    margin-bottom: 30px;
     color: #888;
     font-size: 14px;
     font-style: italic;
 }
-
+.register-page p:last-child{
+    margin-bottom: 30px;
+}
 .register-page .lSide {
     color: #e8ff47;
     font-weight: bold;

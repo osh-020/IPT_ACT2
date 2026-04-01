@@ -115,13 +115,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../customer/style.css">
 </head>
 <body class="register-page">
 
     <div class="container">
     <h1><span class="lSide">COMPU</span><span class="rSide">TRONIUM</span></h1>
-    <p>Welcome to Computronium! Please fill out the form below to create your account.</p>
+    <p>Welcome to Computronium! </p>
+    <p>Please fill out the form below to create your account.</p>
         <?php if ($success): ?>
             <div class="success-message">
                 <strong>Registered successfully!</strong> You can now <a href="login.php">log in</a>.

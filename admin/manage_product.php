@@ -118,7 +118,9 @@ if ($categoryResult) {
                     <div class="search-wrapper">
                         <input type="text" name="search" placeholder="Search by name, description, or brand..." 
                                value="<?php echo htmlspecialchars($searchQuery); ?>" class="search-input">
-                        <button type="submit" class="btn-search-icon">🔍</button>
+                        <button type="submit" class="btn-search-icon">
+                            <img src="./images/search_icon.png" alt="Search" class="search-icon-img">
+                        </button>
                     </div>
                 </div>
 
