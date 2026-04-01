@@ -11,13 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Simple validation
     if (!empty($name) && !empty($email) && !empty($subject) && !empty($message)) {
-        // In a real system, you would send an email here
-        // For now, just show a success message
+        // Display success message
         $success_message = "Thank you for your message! We'll get back to you soon.";
     }
 }
 
-include 'header.php';
+include '../includes/header.php';
 ?>
 
 <main class="main-content">
