@@ -93,6 +93,33 @@ if ($categoryResult) {
 </head>
 <body class="manage_products">
 
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-container">
+            <!-- Logo Section -->
+            <div class="admin-logo">
+                <a href="index.php" class="admin-logo-link">
+                    <img src="../includes/website_pic/logo.png" alt="COMPUTRONIUM Logo" class="admin-logo-img">
+                    <h1>COMPUTRONIUM Admin</h1>
+                </a>
+            </div>
+
+            <!-- Admin Navigation -->
+            <nav class="admin-nav">
+                <ul class="admin-nav-menu">
+                    <li><a href="index.php" class="admin-nav-link">Dashboard</a></li>
+                    <li><a href="manage_product.php" class="admin-nav-link active">Products</a></li>
+                    <li><a href="view_order.php" class="admin-nav-link">Orders</a></li>
+                </ul>
+            </nav>
+
+            <!-- Admin Actions -->
+            <div class="admin-actions">
+                <a href="upload_product.php" class="admin-btn-primary">New Product</a>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
         <h2> Manage Products</h2>
 
@@ -118,7 +145,7 @@ if ($categoryResult) {
                     <div class="search-wrapper">
                         <input type="text" name="search" placeholder="Search by name, description, or brand..." 
                                value="<?php echo htmlspecialchars($searchQuery); ?>" class="search-input">
-                        <button type="submit" class="btn-search-icon">SEARCH</button>
+                        <button type="submit" class="btn-search-icon">Search</button>
                     </div>
                 </div>
 

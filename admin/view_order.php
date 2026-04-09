@@ -1,6 +1,7 @@
 <?php
 session_start();
 include ("../includes/db_connect.php");
+include ("../includes/notifications.php");
 
 $successMessage = '';
 $errorMessage = '';
@@ -34,10 +35,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if (!in_array($newStatus, $allowedStatuses)) {
             $_SESSION['errorMessage'] = "Invalid status.";
         } else {
-            $stmt = $conn->prepare("UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?");
+            // Get order details for notification
+            $orderQuery = $conn->prepare("SELECT user_id, order_status FROM orders WHERE order_id = ?");
+            $orderQuery->bind_param("i", $orderId);
+            $orderQuery->execute();
+            $orderResult = $orderQuery->get_result();
+            $orderData = $orderResult->fetch_assoc();
+            $orderQuery->close();
+            
+            $stmt = $conn->prepare("UPDATE orders SET order_status = ? WHERE order_id = ?");
             $stmt->bind_param("si", $newStatus, $orderId);
             if ($stmt->execute()) {
                 $_SESSION['successMessage'] = "Order #$orderId status updated to " . ucfirst($newStatus) . ".";
+                
+                // Create notification for customer
+                if ($orderData && $orderData['user_id']) {
+                    $notificationType = 'order';
+                    $notificationTitle = '';
+                    $notificationMessage = '';
+                    
+                    if ($newStatus === 'completed') {
+                        $notificationType = 'shipped';
+                        $notificationTitle = "Order #$orderId Completed";
+                        $notificationMessage = "Your order #$orderId has been completed and is ready for pickup or delivery.";
+                    } elseif ($newStatus === 'refunded') {
+                        $notificationType = 'cancelled';
+                        $notificationTitle = "Order #$orderId Refunded";
+                        $notificationMessage = "Your order #$orderId has been refunded. The refund will be processed within 5-7 business days.";
+                    } elseif ($newStatus === 'cancelled') {
+                        $notificationType = 'cancelled';
+                        $notificationTitle = "Order #$orderId Cancelled";
+                        $notificationMessage = "Your order #$orderId has been cancelled.";
+                    }
+                    
+                    if ($notificationTitle) {
+                        createNotification($orderData['user_id'], $notificationType, $notificationTitle, $notificationMessage, $conn, $orderId);
+                    }
+                }
             } else {
                 $_SESSION['errorMessage'] = "Failed to update order status.";
             }
@@ -50,25 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     // Submit / update rating
     if ($_POST['action'] === 'submit_rating') {
-        $rating = intval($_POST['rating'] ?? 0);
-        $review = htmlspecialchars(trim($_POST['review'] ?? ''));
-
-        if ($rating < 1 || $rating > 5) {
-            $_SESSION['errorMessage'] = "Rating must be between 1 and 5.";
-        } else {
-            $stmt = $conn->prepare("
-                INSERT INTO order_ratings (order_id, rating, review, created_at)
-                VALUES (?, ?, ?, NOW())
-                ON DUPLICATE KEY UPDATE rating = VALUES(rating), review = VALUES(review), created_at = NOW()
-            ");
-            $stmt->bind_param("iis", $orderId, $rating, $review);
-            if ($stmt->execute()) {
-                $_SESSION['successMessage'] = "Rating submitted for Order #$orderId.";
-            } else {
-                $_SESSION['errorMessage'] = "Failed to submit rating.";
-            }
-            $stmt->close();
-        }
+        $_SESSION['errorMessage'] = "Rating feature is only available for customers.";
         $qs = http_build_query(array_filter(['status' => $_GET['status'] ?? '', 'search' => $_GET['search'] ?? '']));
         header("Location: view_order.php" . ($qs ? "?$qs" : ''));
         exit();
@@ -79,27 +95,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 $filterStatus = isset($_GET['status']) ? htmlspecialchars(trim($_GET['status'])) : '';
 $searchQuery  = isset($_GET['search'])  ? htmlspecialchars(trim($_GET['search']))  : '';
 
-// Build main query — join with order_ratings
+// Build main query
 $query = "
-    SELECT o.*,
-           COALESCE(r.rating, 0)  AS rating,
-           COALESCE(r.review, '') AS review
+    SELECT o.*
     FROM orders o
-    LEFT JOIN order_ratings r ON r.order_id = o.id
     WHERE 1=1
 ";
 
 if (!empty($filterStatus)) {
     $escapedStatus = $conn->real_escape_string($filterStatus);
-    $query .= " AND o.status = '$escapedStatus'";
+    $query .= " AND o.order_status = '$escapedStatus'";
 }
 
 if (!empty($searchQuery)) {
     $escapedSearch = $conn->real_escape_string("%$searchQuery%");
-    $query .= " AND (o.id LIKE '$escapedSearch' OR o.customer_name LIKE '$escapedSearch' OR o.customer_email LIKE '$escapedSearch')";
+    $query .= " AND (o.order_id LIKE '$escapedSearch' OR o.full_name LIKE '$escapedSearch' OR o.email LIKE '$escapedSearch')";
 }
 
-$query .= " ORDER BY o.created_at DESC";
+$query .= " ORDER BY o.order_date DESC";
 
 $result = $conn->query($query);
 $orders = [];
@@ -111,7 +124,7 @@ if ($result) {
 
 // Count per status for summary strip
 $statusCounts = [];
-$countResult = $conn->query("SELECT status, COUNT(*) as cnt FROM orders GROUP BY status");
+$countResult = $conn->query("SELECT order_status as status, COUNT(*) as cnt FROM orders GROUP BY order_status");
 if ($countResult) {
     while ($row = $countResult->fetch_assoc()) {
         $statusCounts[$row['status']] = $row['cnt'];
@@ -121,23 +134,15 @@ if ($countResult) {
 // Helpers
 function statusBadge($status) {
     $map = [
-        'pending'   => ['label' => '⏳ Pending',   'class' => 'badge-pending'],
-        'preparing' => ['label' => '🔧 Preparing', 'class' => 'badge-preparing'],
-        'shipped'   => ['label' => '🚚 Shipped',   'class' => 'badge-shipped'],
-        'completed' => ['label' => '✅ Completed', 'class' => 'badge-completed'],
-        'refunded'  => ['label' => '↩ Refunded',  'class' => 'badge-refunded'],
-        'cancelled' => ['label' => '✗ Cancelled', 'class' => 'badge-cancelled'],
+        'pending'   => ['label' => 'Pending',   'class' => 'badge-pending'],
+        'preparing' => ['label' => 'Preparing', 'class' => 'badge-preparing'],
+        'shipped'   => ['label' => 'Shipped',   'class' => 'badge-shipped'],
+        'completed' => ['label' => 'Completed', 'class' => 'badge-completed'],
+        'refunded'  => ['label' => 'Refunded',  'class' => 'badge-refunded'],
+        'cancelled' => ['label' => 'Cancelled', 'class' => 'badge-cancelled'],
     ];
     $s = $map[$status] ?? ['label' => ucfirst($status), 'class' => 'badge-pending'];
     return "<span class=\"status-badge {$s['class']}\">{$s['label']}</span>";
-}
-
-function starRating($rating) {
-    $out = '';
-    for ($i = 1; $i <= 5; $i++) {
-        $out .= $i <= $rating ? '<span class="star filled">★</span>' : '<span class="star">★</span>';
-    }
-    return $out;
 }
 ?>
 <!DOCTYPE html>
@@ -178,10 +183,10 @@ function starRating($rating) {
             text-align: center;
             cursor: pointer;
             text-decoration: none;
-            transition: border-color 0.2s, transform 0.2s;
+            transition: border-color 0.2s;
         }
 
-        .summary-card:hover { transform: translateY(-3px); border-color: #555; }
+        .summary-card:hover { border-color: #555; }
         .summary-card.active { border-color: #e8ff47; }
         .summary-card .sc-count { font-size: 26px; font-weight: bold; color: #e8ff47; }
         .summary-card .sc-label { font-size: 11px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -284,32 +289,6 @@ function starRating($rating) {
         .btn-refund:hover   { background: #ffb266; }
         .btn-complete { background: #4caf50; color: #000; }
         .btn-complete:hover { background: #5cc860; }
-        .btn-rate {
-            background: none;
-            border: 1px solid #e8c547;
-            color: #e8c547;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 0;
-            transition: all 0.2s;
-        }
-        .btn-rate:hover { background: #e8c547; color: #000; }
-
-        /* Rating column */
-        .review-text {
-            font-size: 11px;
-            color: #888;
-            font-style: italic;
-            margin-top: 3px;
-            max-width: 130px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
 
         /* Filter Bar */
         .filter-bar {
@@ -324,40 +303,39 @@ function starRating($rating) {
             margin-bottom: 20px;
         }
         .filter-bar .search-wrapper {
-            position: relative;
             flex: 1;
             min-width: 220px;
             display: flex;
             align-items: center;
+            gap: 8px;
         }
         .filter-bar .search-input {
             flex: 1;
-            padding: 9px 42px 9px 10px;
+            padding: 10px;
             border: 1px solid #2a2a32;
             border-radius: 4px;
             background: #0d0d0f;
             color: #f0f0f0;
-            font-size: 13px;
-            width: 100%;
+            font-size: 14px;
+            max-width: 400px;
         }
         .filter-bar .search-input:focus { outline: none; border-color: #f1ff99; }
         .filter-bar .btn-search-icon {
-            position: absolute;
-            right: 8px;
+            position: static;
             background: #47d4ff;
             border: none;
             color: #000;
-            font-size: 13px;
+            font-size: 14px;
             cursor: pointer;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+            padding: 10px 16px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0;
-            margin-top: 0;
             font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: auto;
+            white-space: nowrap;
         }
         .filter-bar .btn-search-icon:hover { background: #5be0ff; }
         .filter-bar select {
@@ -371,93 +349,6 @@ function starRating($rating) {
             min-width: 160px;
         }
 
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.78);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: #141417;
-            border: 1px solid #2a2a32;
-            border-radius: 10px;
-            padding: 30px;
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-        }
-        .modal-box h3 { color: #e8ff47; margin-bottom: 20px; font-size: 18px; }
-        .modal-close {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 22px;
-            cursor: pointer;
-            margin-top: 0;
-            width: auto;
-            padding: 0;
-            line-height: 1;
-        }
-        .modal-close:hover { color: #f0f0f0; background: none; }
-
-        /* Star Picker */
-        .star-picker {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 16px;
-            /* Right-to-left trick for pure CSS hover chain */
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-        }
-        .star-picker input { display: none; }
-        .star-picker label {
-            font-size: 34px;
-            color: #2a2a32;
-            cursor: pointer;
-            margin-top: 0;
-            transition: color 0.12s;
-        }
-        .star-picker label:hover,
-        .star-picker label:hover ~ label,
-        .star-picker input:checked ~ label { color: #e8c547; }
-
-        .modal-box textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #2a2a32;
-            border-radius: 4px;
-            background: #1c1c21;
-            color: #f0f0f0;
-            font-size: 13px;
-            resize: vertical;
-            min-height: 80px;
-            font-family: Arial, sans-serif;
-            margin-bottom: 16px;
-        }
-        .modal-box textarea:focus { outline: none; border-color: #f1ff99; }
-
-        .btn-submit-rating {
-            background: #e8ff47;
-            color: #000;
-            border: none;
-            border-radius: 4px;
-            padding: 11px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 0;
-        }
-        .btn-submit-rating:hover { background: #f0ff66; }
-
         .empty-message { text-align: center; color: #888; padding: 40px 20px; font-style: italic; }
 
         @media (max-width: 768px) {
@@ -469,14 +360,41 @@ function starRating($rating) {
 </head>
 <body class="view_orders">
 
+<!-- Admin Header -->
+<header class="admin-header">
+    <div class="admin-header-container">
+        <!-- Logo Section -->
+        <div class="admin-logo">
+            <a href="index.php" class="admin-logo-link">
+                <img src="../includes/website_pic/logo.png" alt="COMPUTRONIUM Logo" class="admin-logo-img">
+                <h1>COMPUTRONIUM Admin</h1>
+            </a>
+        </div>
+
+        <!-- Admin Navigation -->
+        <nav class="admin-nav">
+            <ul class="admin-nav-menu">
+                <li><a href="index.php" class="admin-nav-link">Dashboard</a></li>
+                <li><a href="manage_product.php" class="admin-nav-link">Products</a></li>
+                <li><a href="view_order.php" class="admin-nav-link active">Orders</a></li>
+            </ul>
+        </nav>
+
+        <!-- Admin Actions -->
+        <div class="admin-actions">
+            <a href="upload_product.php" class="admin-btn-primary">New Product</a>
+        </div>
+    </div>
+</header>
+
 <div class="container">
-    <h2>📦 View Orders</h2>
+    <h2>View Orders</h2>
 
     <?php if ($successMessage): ?>
-        <div class="success-message">✓ <?php echo $successMessage; ?></div>
+        <div class="success-message"><?php echo $successMessage; ?></div>
     <?php endif; ?>
     <?php if ($errorMessage): ?>
-        <div class="error-message">✗ <?php echo $errorMessage; ?></div>
+        <div class="error-message"><?php echo $errorMessage; ?></div>
     <?php endif; ?>
 
     <!-- ── Summary Strip ── -->
@@ -511,7 +429,7 @@ function starRating($rating) {
             <input type="text" name="search" class="search-input"
                    placeholder="Search by order ID, name, or email..."
                    value="<?php echo htmlspecialchars($searchQuery); ?>">
-            <button type="submit" class="btn-search-icon">🔍</button>
+            <button type="submit" class="btn-search-icon">Search</button>
         </div>
         <select name="status" onchange="this.form.submit()">
             <option value="">All Statuses</option>
@@ -537,7 +455,6 @@ function starRating($rating) {
                         <th>Total</th>
                         <th>Date</th>
                         <th>Status</th>
-                        <th>Rating</th>
                         <th>Update Status</th>
                         <th>Actions</th>
                     </tr>
@@ -546,45 +463,31 @@ function starRating($rating) {
                 <?php foreach ($orders as $order): ?>
                     <tr>
                         <!-- Order ID -->
-                        <td><span class="order-id">#<?php echo intval($order['id']); ?></span></td>
+                        <td><span class="order-id">#<?php echo intval($order['order_id']); ?></span></td>
 
                         <!-- Customer -->
                         <td>
-                            <div><?php echo htmlspecialchars($order['customer_name']); ?></div>
-                            <div class="customer-email"><?php echo htmlspecialchars($order['customer_email']); ?></div>
+                            <div><?php echo htmlspecialchars($order['full_name']); ?></div>
+                            <div class="customer-email"><?php echo htmlspecialchars($order['email']); ?></div>
                         </td>
 
                         <!-- Total -->
-                        <td class="order-total">₱<?php echo number_format(floatval($order['total_amount']), 2); ?></td>
+                        <td class="order-total">₱<?php echo number_format(floatval($order['total']), 2); ?></td>
 
                         <!-- Date -->
-                        <td><?php echo date('M j, Y', strtotime($order['created_at'])); ?></td>
+                        <td><?php echo date('M j, Y', strtotime($order['order_date'])); ?></td>
 
                         <!-- Status Badge -->
-                        <td><?php echo statusBadge($order['status']); ?></td>
-
-                        <!-- Rating -->
-                        <td>
-                            <?php if ($order['rating'] > 0): ?>
-                                <div><?php echo starRating($order['rating']); ?></div>
-                                <?php if (!empty($order['review'])): ?>
-                                    <div class="review-text" title="<?php echo htmlspecialchars($order['review']); ?>">
-                                        "<?php echo htmlspecialchars($order['review']); ?>"
-                                    </div>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <span style="color:#555; font-size:12px;">No rating yet</span>
-                            <?php endif; ?>
-                        </td>
+                        <td><?php echo statusBadge($order['order_status']); ?></td>
 
                         <!-- Update Status (inline dropdown) -->
                         <td>
                             <form method="POST" class="status-select-form">
                                 <input type="hidden" name="action"   value="update_status">
-                                <input type="hidden" name="order_id" value="<?php echo intval($order['id']); ?>">
+                                <input type="hidden" name="order_id" value="<?php echo intval($order['order_id']); ?>">
                                 <select name="status">
                                     <?php foreach (['pending','preparing','shipped','completed','refunded','cancelled'] as $s): ?>
-                                        <option value="<?php echo $s; ?>" <?php echo $order['status'] === $s ? 'selected' : ''; ?>>
+                                        <option value="<?php echo $s; ?>" <?php echo $order['order_status'] === $s ? 'selected' : ''; ?>>
                                             <?php echo ucfirst($s); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -596,32 +499,24 @@ function starRating($rating) {
                         <!-- Quick Actions -->
                         <td>
                             <div class="actions-cell">
-                                <?php if (!in_array($order['status'], ['refunded','cancelled'])): ?>
-                                    <form method="POST" onsubmit="return confirm('Mark Order #<?php echo intval($order['id']); ?> as Refunded?')">
+                                <?php if (!in_array($order['order_status'], ['refunded','cancelled'])): ?>
+                                    <form method="POST" onsubmit="return confirm('Mark Order #<?php echo intval($order['order_id']); ?> as Refunded?')">
                                         <input type="hidden" name="action"   value="update_status">
-                                        <input type="hidden" name="order_id" value="<?php echo intval($order['id']); ?>">
+                                        <input type="hidden" name="order_id" value="<?php echo intval($order['order_id']); ?>">
                                         <input type="hidden" name="status"   value="refunded">
-                                        <button type="submit" class="btn-quick btn-refund">↩ Refund</button>
+                                        <button type="submit" class="btn-quick btn-refund">Refund</button>
                                     </form>
                                 <?php endif; ?>
 
-                                <?php if (!in_array($order['status'], ['completed','cancelled','refunded'])): ?>
-                                    <form method="POST" onsubmit="return confirm('Mark Order #<?php echo intval($order['id']); ?> as Refunded?')">
+                                <?php if (!in_array($order['order_status'], ['completed','cancelled','refunded'])): ?>
+                                    <form method="POST" onsubmit="return confirm('Mark Order #<?php echo intval($order['order_id']); ?> as Completed?')">
                                         <input type="hidden" name="action"   value="update_status">
-                                        <input type="hidden" name="order_id" value="<?php echo intval($order['id']); ?>">
+                                        <input type="hidden" name="order_id" value="<?php echo intval($order['order_id']); ?>">
                                         <input type="hidden" name="status"   value="completed">
-                                        <button type="submit" class="btn-quick btn-complete">✓ Complete</button>
+                                        <button type="submit" class="btn-quick btn-complete">Complete</button>
                                     </form>
                                 <?php endif; ?>
 
-                                <button type="button" class="btn-rate"
-                                        onclick="openRatingModal(
-                                            <?php echo intval($order['id']); ?>,
-                                            <?php echo intval($order['rating']); ?>,
-                                            <?php echo json_encode($order['review']); ?>
-                                        )">
-                                    ★ <?php echo $order['rating'] > 0 ? 'Edit Rating' : 'Rate'; ?>
-                                </button>
                             </div>
                         </td>
                     </tr>
@@ -636,57 +531,5 @@ function starRating($rating) {
     <?php endif; ?>
 </div>
 
-<!-- ── Rating Modal ── -->
-<div class="modal-overlay" id="ratingModal">
-    <div class="modal-box">
-        <button type="button" class="modal-close" onclick="closeRatingModal()">✕</button>
-        <h3>⭐ Rate Order <span id="modalOrderLabel"></span></h3>
-        <form method="POST" id="ratingForm">
-            <input type="hidden" name="action"   value="submit_rating">
-            <input type="hidden" name="order_id" id="modalOrderId">
-
-            <label>Your Rating:</label>
-            <div class="star-picker">
-                <!-- reversed for CSS sibling trick -->
-                <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
-                <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
-                <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
-                <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
-                <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
-            </div>
-
-            <label for="reviewText">Review (optional):</label>
-            <textarea id="reviewText" name="review" placeholder="Share your thoughts about this order..."></textarea>
-
-            <button type="submit" class="btn-submit-rating">Submit Rating</button>
-        </form>
-    </div>
-</div>
-
-<script>
-    function openRatingModal(orderId, currentRating, currentReview) {
-        document.getElementById('modalOrderId').value          = orderId;
-        document.getElementById('modalOrderLabel').textContent = '#' + orderId;
-        document.getElementById('reviewText').value            = currentReview || '';
-
-        // Clear all, then pre-check if rated
-        document.querySelectorAll('.star-picker input').forEach(r => r.checked = false);
-        if (currentRating > 0) {
-            const radio = document.getElementById('star' + currentRating);
-            if (radio) radio.checked = true;
-        }
-
-        document.getElementById('ratingModal').classList.add('active');
-    }
-
-    function closeRatingModal() {
-        document.getElementById('ratingModal').classList.remove('active');
-    }
-
-    // Close on backdrop click
-    document.getElementById('ratingModal').addEventListener('click', function(e) {
-        if (e.target === this) closeRatingModal();
-    });
-</script>
 </body>
 </html>

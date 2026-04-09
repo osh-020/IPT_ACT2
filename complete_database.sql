@@ -101,6 +101,18 @@ CREATE TABLE `order_items` (
   `subtotal` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+-- Table structure for table `order_ratings`
+-- --------------------------------------------------------
+
+CREATE TABLE `order_ratings` (
+  `rating_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `review` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- =====================================================
 -- INDEXES FOR DUMPED TABLES
 -- =====================================================
@@ -135,6 +147,13 @@ ALTER TABLE `order_items`
   ADD KEY `product_id` (`product_id`);
 
 --
+-- Indexes for table `order_ratings`
+--
+ALTER TABLE `order_ratings`
+  ADD PRIMARY KEY (`rating_id`),
+  ADD UNIQUE KEY `order_id` (`order_id`);
+
+--
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
@@ -146,6 +165,12 @@ ALTER TABLE `orders`
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `order_ratings`
+--
+ALTER TABLE `order_ratings`
+  ADD CONSTRAINT `order_ratings_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE;
 
 -- =====================================================
 -- AUTO_INCREMENT FOR DUMPED TABLES
@@ -174,6 +199,12 @@ ALTER TABLE `orders`
 --
 ALTER TABLE `order_items`
   MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `order_ratings`
+--
+ALTER TABLE `order_ratings`
+  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT;
 
 -- =====================================================
 -- TABLE STRUCTURE FOR NOTIFICATIONS

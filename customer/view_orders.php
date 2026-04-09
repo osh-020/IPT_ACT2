@@ -11,6 +11,33 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Handle order rating submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_rating'])) {
+    $order_id = intval($_POST['order_id']);
+    $rating = intval($_POST['rating'] ?? 0);
+    $review = htmlspecialchars(trim($_POST['review'] ?? ''));
+    
+    // Verify order belongs to user
+    $verify_stmt = $conn->prepare("SELECT order_id FROM orders WHERE order_id = ? AND user_id = ?");
+    $verify_stmt->bind_param("ii", $order_id, $user_id);
+    $verify_stmt->execute();
+    $verify_result = $verify_stmt->get_result();
+    
+    if ($verify_result->num_rows > 0 && $rating >= 1 && $rating <= 5) {
+        $insert_stmt = $conn->prepare("
+            INSERT INTO order_ratings (order_id, rating, review, created_at)
+            VALUES (?, ?, ?, NOW())
+            ON DUPLICATE KEY UPDATE rating = VALUES(rating), review = VALUES(review), created_at = NOW()
+        ");
+        $insert_stmt->bind_param("iis", $order_id, $rating, $review);
+        $insert_stmt->execute();
+        $insert_stmt->close();
+        
+        $rating_success = "Thank you for rating your order!";
+    }
+    $verify_stmt->close();
+}
+
 // Handle order cancellation
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_order'])) {
     $order_id = intval($_POST['order_id']);
@@ -45,8 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_order'])) {
     }
 }
 
-// Get all orders for the user
-$orders_stmt = $conn->prepare("SELECT order_id, order_date, subtotal, tax, total, payment_method, order_status FROM orders WHERE user_id = ? ORDER BY order_date DESC");
+// Get all orders for the user with ratings
+$orders_stmt = $conn->prepare("
+    SELECT o.order_id, o.order_date, o.subtotal, o.tax, o.total, o.payment_method, o.order_status,
+           COALESCE(r.rating, 0) AS rating, COALESCE(r.review, '') AS review
+    FROM orders o
+    LEFT JOIN order_ratings r ON r.order_id = o.order_id
+    WHERE o.user_id = ? 
+    ORDER BY o.order_date DESC
+");
 $orders_stmt->bind_param("i", $user_id);
 $orders_stmt->execute();
 $orders_result = $orders_stmt->get_result();
