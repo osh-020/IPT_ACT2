@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['delete_id'])) {
     
     if ($product) {
         // Delete image file
-        $imagePath = __DIR__ . '/uploads/' . $product['image'];
+        $imagePath = dirname(__DIR__) . '/includes/product_pic/' . $product['image'];
         if (file_exists($imagePath)) {
             unlink($imagePath);
         }
@@ -89,7 +89,7 @@ if ($categoryResult) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Products</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../includes/admin_style.css">
 </head>
 <body class="manage_products">
 
@@ -118,9 +118,7 @@ if ($categoryResult) {
                     <div class="search-wrapper">
                         <input type="text" name="search" placeholder="Search by name, description, or brand..." 
                                value="<?php echo htmlspecialchars($searchQuery); ?>" class="search-input">
-                        <button type="submit" class="btn-search-icon">
-                            <img src="./images/search_icon.png" alt="Search" class="search-icon-img">
-                        </button>
+                        <button type="submit" class="btn-search-icon">SEARCH</button>
                     </div>
                 </div>
 
@@ -146,7 +144,7 @@ if ($categoryResult) {
             <div class="products-grid">
                 <?php foreach ($products as $product): ?>
                     <div class="product-card">
-                        <img src="./uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                        <img src="../includes/product_pic/<?php echo htmlspecialchars($product['image']); ?>" 
                              alt="<?php echo htmlspecialchars($product['name']); ?>" 
                              class="product-image" 
                              onerror="this.classList.add('no-image'); this.alt='No Image Available'">

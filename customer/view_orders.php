@@ -60,7 +60,7 @@ $orders_stmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Orders - COMPUTRONIUM</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../includes/customer_style.css">
     <style>
         .orders-container {
             max-width: 1000px;

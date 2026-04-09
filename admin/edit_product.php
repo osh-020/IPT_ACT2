@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && $product) {
             } else {
                 // Create unique filename
                 $newFileName = time() . '_' . rand(1000, 9999) . '.' . $fileExtension;
-                $uploadDir = __DIR__ . '/uploads/';
+                $uploadDir = dirname(__DIR__) . '/includes/product_pic/';
                 
                 // Create uploads directory if it doesn't exist
                 if (!is_dir($uploadDir)) {
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && $product) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../includes/admin_style.css">
 </head>
 <body class="edit_product">
 
@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && $product) {
 
                 <div class="preview-container show" id="previewContainer">
                     <p class="preview-label">Current Image:</p>
-                    <img id="previewImage" src="./uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                    <img id="previewImage" src="../includes/product_pic/<?php echo htmlspecialchars($product['image']); ?>" 
                          alt="<?php echo htmlspecialchars($product['name']); ?>"
                          onerror="this.classList.add('no-image'); this.alt='No Image Available'">
                 </div>

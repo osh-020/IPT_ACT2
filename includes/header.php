@@ -9,7 +9,7 @@ require_once dirname(__FILE__) . '/db_connect.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COMPUTRONIUM</title>
-    <link rel="stylesheet" href="../includes/style.css">
+    <link rel="stylesheet" href="../includes/customer_style.css">
     <style>
         .notification-badge {
             position: relative;
@@ -63,8 +63,8 @@ require_once dirname(__FILE__) . '/db_connect.php';
             <div class="navbar-right">
                 <!-- Search Bar -->
                 <form action="products.php" method="GET" class="search-form">
-                    <input type="text" name="search" placeholder="Search products..." class="search-input">
-                    <button type="submit" class="search-btn">Search</button>
+                    <input type="text" name="search" placeholder="SEARCH" class="search-input">
+                    <button type="submit" class="search-btn">SEARCH</button>
                 </form>
 
                 <!-- Notifications -->

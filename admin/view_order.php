@@ -146,7 +146,7 @@ function starRating($rating) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Orders</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../includes/admin_style.css">
     <style>
         /* ===============================================
            VIEW ORDERS PAGE - CUSTOMIZATION STYLES

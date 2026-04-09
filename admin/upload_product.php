@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_FILES['image'])) {
         } else {
             // Create unique filename
             $newFileName = time() . '_' . rand(1000, 9999) . '.' . $fileExtension;
-            $uploadDir = __DIR__ . '/uploads/';
+            $uploadDir = dirname(__DIR__) . '/includes/product_pic/';
             
             // Create uploads directory if it doesn't exist
             if (!is_dir($uploadDir)) {
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_FILES['image'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Product</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../includes/admin_style.css">
 </head>
 <body class="upload_product">
 
