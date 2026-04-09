@@ -151,6 +151,7 @@ function statusBadge($status) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Orders</title>
+    <link rel="icon" type="image/png" href="../includes/website_pic/logo.png">
     <link rel="stylesheet" href="../includes/admin_style.css">
     <style>
         /* ===============================================

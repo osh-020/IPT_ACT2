@@ -124,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && $product) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product</title>
+    <link rel="icon" type="image/png" href="../includes/website_pic/logo.png">
     <link rel="stylesheet" href="../includes/admin_style.css">
 </head>
 <body class="edit_product">

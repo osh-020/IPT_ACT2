@@ -91,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_FILES['image'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Product</title>
+    <link rel="icon" type="image/png" href="../includes/website_pic/logo.png">
     <link rel="stylesheet" href="../includes/admin_style.css">
 </head>
 <body class="upload_product">

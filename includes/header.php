@@ -9,6 +9,7 @@ require_once dirname(__FILE__) . '/db_connect.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COMPUTRONIUM</title>
+    <link rel="icon" type="image/png" href="../includes/website_pic/logo.png">
     <link rel="stylesheet" href="../includes/customer_style.css">
     <style>
         .notification-badge {
