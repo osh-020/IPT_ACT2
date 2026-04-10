@@ -245,6 +245,42 @@ ALTER TABLE `notifications`
   MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
 
 -- =====================================================
+-- TABLE STRUCTURE FOR ADMIN NOTIFICATIONS
+-- =====================================================
+
+CREATE TABLE `admin_notifications` (
+  `notification_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL DEFAULT 'order',
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Indexes for table `admin_notifications`
+--
+ALTER TABLE `admin_notifications`
+  ADD PRIMARY KEY (`notification_id`),
+  ADD KEY `order_id` (`order_id`),
+  ADD KEY `created_at` (`created_at`),
+  ADD KEY `is_read` (`is_read`);
+
+--
+-- Constraints for table `admin_notifications`
+--
+ALTER TABLE `admin_notifications`
+  ADD CONSTRAINT `admin_notifications_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE;
+
+--
+-- AUTO_INCREMENT for table `admin_notifications`
+--
+ALTER TABLE `admin_notifications`
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- =====================================================
 -- SAMPLE DATA - USERS
 -- =====================================================
 -- Sample User Accounts for Testing

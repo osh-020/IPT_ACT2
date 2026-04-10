@@ -1,6 +1,6 @@
 <?php
 // Session already started in calling pages
-require_once dirname(__FILE__) . '/notifications.php';
+require_once dirname(__FILE__) . '/customer_notifications.php';
 require_once dirname(__FILE__) . '/db_connect.php';
 ?>
 <!DOCTYPE html>
@@ -73,7 +73,7 @@ require_once dirname(__FILE__) . '/db_connect.php';
                 if (isset($_SESSION['user_id'])) {
                     $unread_count = getUnreadNotificationsCount($_SESSION['user_id'], $conn);
                     echo '<a href="notifications.php" class="notification-link notification-badge">';
-                    echo '[Notifications]';
+                    echo 'Notifications';
                     if ($unread_count > 0) {
                         echo '<span class="notification-dot">' . $unread_count . '</span>';
                     }

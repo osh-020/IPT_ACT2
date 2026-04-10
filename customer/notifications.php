@@ -2,7 +2,7 @@
 session_start();
 require_once '../includes/header.php';
 require_once '../includes/db_connect.php';
-require_once '../includes/notifications.php';
+require_once '../includes/customer_notifications.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {

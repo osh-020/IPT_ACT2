@@ -1,10 +1,14 @@
 <?php
 session_start();
 include ("../includes/db_connect.php");
-include ("../includes/notifications.php");
+include ("../includes/customer_notifications.php");
+include ("../includes/admin_notifications.php");
 
 $successMessage = '';
 $errorMessage = '';
+
+// Get admin notification count
+$adminUnreadCount = getAdminUnreadNotificationsCount($conn);
 
 // Check for session messages
 if (isset($_SESSION['successMessage'])) {
@@ -71,6 +75,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     if ($notificationTitle) {
                         createNotification($orderData['user_id'], $notificationType, $notificationTitle, $notificationMessage, $conn, $orderId);
                     }
+                }
+                
+                // Create admin notification
+                $adminNotifType = 'order';
+                $adminNotifTitle = '';
+                $adminNotifMessage = '';
+                
+                if ($newStatus === 'pending') {
+                    $adminNotifType = 'order';
+                    $adminNotifTitle = "New Order #$orderId";
+                    $adminNotifMessage = "A new order has been placed. Click to view details.";
+                } elseif ($newStatus === 'refunded') {
+                    $adminNotifType = 'refund';
+                    $adminNotifTitle = "Order #$orderId Refunded";
+                    $adminNotifMessage = "Order #$orderId has been marked as refunded.";
+                } elseif ($newStatus === 'cancelled') {
+                    $adminNotifType = 'cancel';
+                    $adminNotifTitle = "Order #$orderId Cancelled";
+                    $adminNotifMessage = "Order #$orderId has been cancelled.";
+                }
+                
+                if ($adminNotifTitle) {
+                    createAdminNotification($orderId, $adminNotifType, $adminNotifTitle, $adminNotifMessage, $conn);
                 }
             } else {
                 $_SESSION['errorMessage'] = "Failed to update order status.";
@@ -153,211 +180,6 @@ function statusBadge($status) {
     <title>View Orders</title>
     <link rel="icon" type="image/png" href="../includes/website_pic/logo.png">
     <link rel="stylesheet" href="../includes/admin_style.css">
-    <style>
-        /* ===============================================
-           VIEW ORDERS PAGE - CUSTOMIZATION STYLES
-           =============================================== */
-
-        .view_orders .container { max-width: 1150px; }
-
-        .view_orders h2 {
-            border-bottom: 2px solid #e8ff47;
-            padding-bottom: 10px;
-            text-align: center;
-        }
-
-        /* Summary Strip */
-        .summary-strip {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .summary-card {
-            flex: 1;
-            min-width: 120px;
-            background: #1c1c21;
-            border: 1px solid #2a2a32;
-            border-radius: 8px;
-            padding: 14px 10px;
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-            transition: border-color 0.2s;
-        }
-
-        .summary-card:hover { border-color: #555; }
-        .summary-card.active { border-color: #e8ff47; }
-        .summary-card .sc-count { font-size: 26px; font-weight: bold; color: #e8ff47; }
-        .summary-card .sc-label { font-size: 11px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* Status Badges */
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-        }
-
-        .badge-pending   { background: #3a3010; color: #e8c547; border: 1px solid #5a4e1a; }
-        .badge-preparing { background: #1a2a3a; color: #47b4ff; border: 1px solid #1a4060; }
-        .badge-shipped   { background: #1a1a3a; color: #a47dff; border: 1px solid #3a2a6a; }
-        .badge-completed { background: #1a2a1a; color: #4caf50; border: 1px solid #2a4a2a; }
-        .badge-refunded  { background: #2a2010; color: #ff9f47; border: 1px solid #4a3a10; }
-        .badge-cancelled { background: #2a1a1a; color: #ff6b6b; border: 1px solid #4a2a2a; }
-
-        /* Orders Table */
-        .orders-table-wrapper {
-            overflow-x: auto;
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #2a2a32;
-        }
-
-        .orders-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .orders-table thead tr { background: #1c1c21; }
-        .orders-table th {
-            padding: 12px 14px;
-            text-align: left;
-            color: #e8ff47;
-            font-weight: bold;
-            border-bottom: 1px solid #2a2a32;
-            white-space: nowrap;
-        }
-        .orders-table td {
-            padding: 11px 14px;
-            color: #f0f0f0;
-            border-bottom: 1px solid #1c1c21;
-            vertical-align: middle;
-        }
-        .orders-table tbody tr { background: #141417; transition: background 0.15s; }
-        .orders-table tbody tr:hover { background: #1c1c21; }
-
-        .order-id      { color: #47d4ff; font-weight: bold; }
-        .customer-email { color: #888; font-size: 11px; }
-        .order-total   { color: #4caf50; font-weight: bold; }
-
-        /* Inline status form */
-        .status-select-form { display: flex; gap: 6px; align-items: center; }
-        .status-select-form select {
-            padding: 6px 8px;
-            font-size: 12px;
-            border-radius: 4px;
-            background: #0d0d0f;
-            color: #f0f0f0;
-            border: 1px solid #2a2a32;
-            width: auto;
-        }
-        .btn-status-update {
-            padding: 6px 12px;
-            background: #e8ff47;
-            color: #000;
-            border: none;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 0;
-            width: auto;
-        }
-        .btn-status-update:hover { background: #f0ff66; }
-
-        /* Stars */
-        .star        { font-size: 15px; color: #2a2a32; }
-        .star.filled { color: #e8c547; }
-
-        /* Action buttons */
-        .actions-cell { display: flex; flex-direction: column; gap: 6px; min-width: 105px; }
-
-        .btn-quick {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 0;
-            transition: all 0.2s;
-            white-space: nowrap;
-            text-align: center;
-        }
-        .btn-refund   { background: #ff9f47; color: #000; }
-        .btn-refund:hover   { background: #ffb266; }
-        .btn-complete { background: #4caf50; color: #000; }
-        .btn-complete:hover { background: #5cc860; }
-
-        /* Filter Bar */
-        .filter-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-            background: #1c1c21;
-            padding: 16px;
-            border-radius: 8px;
-            border: 1px solid #2a2a32;
-            margin-bottom: 20px;
-        }
-        .filter-bar .search-wrapper {
-            flex: 1;
-            min-width: 220px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .filter-bar .search-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #2a2a32;
-            border-radius: 4px;
-            background: #0d0d0f;
-            color: #f0f0f0;
-            font-size: 14px;
-            max-width: 400px;
-        }
-        .filter-bar .search-input:focus { outline: none; border-color: #f1ff99; }
-        .filter-bar .btn-search-icon {
-            position: static;
-            background: #47d4ff;
-            border: none;
-            color: #000;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 16px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            min-width: auto;
-            white-space: nowrap;
-        }
-        .filter-bar .btn-search-icon:hover { background: #5be0ff; }
-        .filter-bar select {
-            padding: 9px 10px;
-            border: 1px solid #2a2a32;
-            border-radius: 4px;
-            background: #0d0d0f;
-            color: #f0f0f0;
-            font-size: 13px;
-            width: auto;
-            min-width: 160px;
-        }
-
-        .empty-message { text-align: center; color: #888; padding: 40px 20px; font-style: italic; }
-
-        @media (max-width: 768px) {
-            .orders-table th:nth-child(4),
-            .orders-table td:nth-child(4) { display: none; }
-            .status-select-form { flex-direction: column; }
-        }
-    </style>
 </head>
 <body class="view_orders">
 
@@ -378,6 +200,7 @@ function statusBadge($status) {
                 <li><a href="index.php" class="admin-nav-link">Dashboard</a></li>
                 <li><a href="manage_product.php" class="admin-nav-link">Products</a></li>
                 <li><a href="view_order.php" class="admin-nav-link active">Orders</a></li>
+                <li><a href="notifications.php" class="admin-nav-link">Notifications<?php if ($adminUnreadCount > 0): ?> <span style="display: inline-block; background: #ff4444; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; font-size: 12px; margin-left: 5px;"><?php echo $adminUnreadCount; ?></span><?php endif; ?></a></li>
             </ul>
         </nav>
 

@@ -1,7 +1,8 @@
 <?php
 session_start();
 include '../includes/db_connect.php';
-require_once '../includes/notifications.php';
+require_once '../includes/customer_notifications.php';
+require_once '../includes/admin_notifications.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -9,22 +10,24 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Initialize order
+// Calculate cart totals (only selected items)
 $subtotal = 0;
 $cart_items = [];
 
-// Calculate cart totals
 if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $product_id => $item) {
-        $item_total = $item['price'] * $item['quantity'];
-        $subtotal += $item_total;
-        $cart_items[] = [
-            'id' => $product_id,
-            'name' => $item['name'],
-            'price' => $item['price'],
-            'quantity' => $item['quantity'],
-            'total' => $item_total
-        ];
+        // Only include selected items
+        if (isset($_SESSION['cart_selected'][$product_id])) {
+            $item_total = $item['price'] * $item['quantity'];
+            $subtotal += $item_total;
+            $cart_items[] = [
+                'id' => $product_id,
+                'name' => $item['name'],
+                'price' => $item['price'],
+                'quantity' => $item['quantity'],
+                'total' => $item_total
+            ];
+        }
     }
 }
 
@@ -37,7 +40,7 @@ $error_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['place_order'])) {
     if (empty($cart_items)) {
-        $error_message = "Your cart is empty!";
+        $error_message = "Please select items to order!";
     } else {
         // Get user info for order
         $user_info_stmt = $conn->prepare("SELECT full_name, email, mobile_number, address, zip_code FROM users WHERE user_id = ?");
@@ -77,8 +80,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['place_order'])) {
                 $order_id
             );
 
-            // Clear the cart
-            $_SESSION['cart'] = [];
+            // Create admin notification for new order
+            createAdminNotification(
+                $order_id,
+                'order',
+                'New Order #' . str_pad($order_id, 6, '0', STR_PAD_LEFT),
+                'New order from ' . $user_info['full_name'] . ' - Total: ₱' . number_format($total, 2),
+                $conn
+            );
+
+            // Clear only the selected items from cart
+            foreach ($cart_items as $item) {
+                if (isset($_SESSION['cart'][$item['id']])) {
+                    unset($_SESSION['cart'][$item['id']]);
+                }
+                if (isset($_SESSION['cart_selected'][$item['id']])) {
+                    unset($_SESSION['cart_selected'][$item['id']]);
+                }
+            }
+            
             $order_success = true;
         } else {
             $error_message = "Error placing order. Please try again.";
@@ -142,7 +162,7 @@ $user_stmt->close();
 
                 echo "<div class='summary-totals'>";
                 echo "<div class='total-row'>";
-                echo "<span>Subtotal:</span>";
+                echo "<span>Subtotal (Selected Items):</span>";
                 echo "<span>₱" . number_format($subtotal, 2) . "</span>";
                 echo "</div>";
                 echo "<div class='total-row'>";
