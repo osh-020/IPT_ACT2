@@ -145,6 +145,17 @@ $result = $conn->query($query);
 $orders = [];
 if ($result) {
     while ($row = $result->fetch_assoc()) {
+        // Fetch order items for this order
+        $itemsQuery = $conn->prepare("SELECT product_name, quantity, price FROM order_items WHERE order_id = ?");
+        $itemsQuery->bind_param("i", $row['order_id']);
+        $itemsQuery->execute();
+        $itemsResult = $itemsQuery->get_result();
+        $items = [];
+        while ($item = $itemsResult->fetch_assoc()) {
+            $items[] = $item;
+        }
+        $itemsQuery->close();
+        $row['items'] = $items;
         $orders[] = $row;
     }
 }
@@ -239,6 +250,8 @@ function statusBadge($status) {
                     <tr>
                         <th>Order ID</th>
                         <th>Customer</th>
+                        <th>Products</th>
+                        <th>Quantity</th>
                         <th>Total</th>
                         <th>Date</th>
                         <th>Status</th>
@@ -256,6 +269,32 @@ function statusBadge($status) {
                         <td>
                             <div><?php echo htmlspecialchars($order['full_name']); ?></div>
                             <div class="customer-email"><?php echo htmlspecialchars($order['email']); ?></div>
+                        </td>
+
+                        <!-- Products -->
+                        <td>
+                            <?php if (!empty($order['items'])): ?>
+                                <ul style="list-style: none; padding: 0; margin: 0;">
+                                <?php foreach ($order['items'] as $item): ?>
+                                    <li style="padding: 2px 0;"><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></li>
+                                <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <span class="text-muted">No items</span>
+                            <?php endif; ?>
+                        </td>
+
+                        <!-- Quantity -->
+                        <td>
+                            <?php 
+                            $totalQuantity = 0;
+                            if (!empty($order['items'])) {
+                                foreach ($order['items'] as $item) {
+                                    $totalQuantity += intval($item['quantity']);
+                                }
+                            }
+                            echo $totalQuantity;
+                            ?>
                         </td>
 
                         <!-- Total -->
