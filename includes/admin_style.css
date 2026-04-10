@@ -15,11 +15,11 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 900px;
     margin: 0 auto;
     background: #141417;
     padding: 30px;
-    border-radius: 8px;
+    border-radius: 0;
     box-shadow: 0 0 20px rgba(77, 77, 77, 0.2);
     display: flex;
     flex-direction: column;
@@ -43,7 +43,7 @@ input, select, textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 14px;
     background: #1c1c21;
     color: #f0f0f0;
@@ -62,7 +62,7 @@ button {
     background: #e8ff47;
     color: #000000;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -77,7 +77,7 @@ button:hover {
     margin: 15px 0;
     padding: 12px;
     background: #2a1c1c;
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .error-message ul {
@@ -94,7 +94,7 @@ button:hover {
     margin: 15px 0;
     padding: 12px;
     background: #1c2a1c;
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .success-message a {
@@ -136,7 +136,7 @@ button:hover {
     width: 100%;
     padding: 10px;
     border: 1px solid #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 14px;
     background: #1c1c21;
     color: #f0f0f0;
@@ -167,7 +167,7 @@ button:hover {
     background: #666;
     color: #f0f0f0;
     border: 1px solid #555;
-    border-radius: 4px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: bold;
     cursor: pointer;
@@ -204,7 +204,7 @@ button:hover {
     background: #ff6b6b;
     color: #fff;
     border: none;
-    border-radius: 50%;
+    border-radius: 0;
     width: 30px;
     height: 30px;
     padding: 0;
@@ -224,7 +224,7 @@ button:hover {
     max-width: 100%;
     max-height: 200px;
     border: 2px solid #47d4ff;
-    border-radius: 5px;
+    border-radius: 0;
     margin-bottom: 10px;
 }
 
@@ -267,7 +267,7 @@ button:hover {
 .product-card {
     background: #1c1c21;
     border: 1px solid #2a2a32;
-    border-radius: 8px;
+    border-radius: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -344,7 +344,7 @@ button:hover {
     flex: 1;
     padding: 8px;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: bold;
     cursor: pointer;
@@ -390,7 +390,7 @@ button:hover {
     background: #e8ff47;
     color: #000;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: bold;
     cursor: pointer;
@@ -404,7 +404,7 @@ button:hover {
 .search-filter-section {
     background: #1c1c21;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 0;
     margin-bottom: 20px;
     border: 1px solid #2a2a32;
 }
@@ -432,7 +432,7 @@ button:hover {
 .search-input {
     padding: 10px;
     border: 1px solid #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     background: #0d0d0f;
     color: #f0f0f0;
     font-size: 14px;
@@ -453,7 +453,7 @@ button:hover {
     font-size: 14px;
     cursor: pointer;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -475,7 +475,7 @@ button:hover {
     width: 100%;
     padding: 10px;
     border: 1px solid #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     background: #0d0d0f;
     color: #f0f0f0;
     font-size: 14px;
@@ -493,7 +493,7 @@ button:hover {
     background: #ff6b6b;
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: bold;
     cursor: pointer;
@@ -509,7 +509,7 @@ button:hover {
     background: #666;
     color: #f0f0f0;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: bold;
     cursor: pointer;
@@ -549,7 +549,7 @@ button:hover {
     padding: 12px;
     font-size: 16px;
     font-weight: bold;
-    border-radius: 4px;
+    border-radius: 0;
     cursor: pointer;
     border: none;
     transition: all 0.3s ease;
@@ -701,7 +701,7 @@ main {
 
 .admin-btn-primary, .admin-btn-secondary {
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: bold;
     cursor: pointer;
@@ -769,7 +769,7 @@ main {
 .stat-card {
     background: #1c1c21;
     border: 1px solid #2a2a32;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 25px;
     display: flex;
     gap: 20px;
@@ -783,17 +783,7 @@ main {
 }
 
 .stat-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(232, 255, 71, 0.1);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    color: #e8ff47;
-    flex-shrink: 0;
-    font-style: normal;
+    display: none;
 }
 
 .stat-content {
@@ -830,7 +820,7 @@ main {
 .quick-actions {
     background: #1c1c21;
     border: 1px solid #2a2a32;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 30px;
 }
 
@@ -851,7 +841,7 @@ main {
 .action-card {
     background: rgba(71, 212, 255, 0.05);
     border: 2px solid #47d4ff;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 20px;
     text-align: center;
     transition: all 0.3s ease;
@@ -863,15 +853,7 @@ main {
 }
 
 .action-icon {
-    font-size: 32px;
-    color: #47d4ff;
-    margin-bottom: 12px;
-    transition: color 0.3s ease;
-    display: block;
-}
-
-.action-card:hover .action-icon {
-    color: #e8ff47;
+    display: none;
 }
 
 .action-card h4 {
@@ -891,7 +873,7 @@ main {
     background: #47d4ff;
     color: #000;
     padding: 8px 20px;
-    border-radius: 4px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: bold;
     transition: all 0.3s ease;
@@ -899,23 +881,6 @@ main {
 
 .action-btn:hover {
     background: #5be0ff;
-}
-
-/* Admin Footer */
-.admin-footer {
-    background: #141417;
-    border-top: 2px solid #e8ff47;
-    padding: 20px 0;
-    text-align: center;
-    color: #888;
-    font-size: 13px;
-    margin-top: auto;
-}
-
-.footer-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
 }
 
 /* Responsive Design */
@@ -997,7 +962,7 @@ main {
     margin: 100px auto;
     padding: 40px;
     background: white;
-    border-radius: 8px;
+    border-radius: 0;
     border: 2px solid #ffc107;
     text-align: center;
 }
@@ -1009,7 +974,7 @@ main {
     background-color: #0066cc;
     color: white;
     padding: 12px 30px;
-    border-radius: 5px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: bold;
     cursor: pointer;
@@ -1041,9 +1006,9 @@ main {
 }
 
 .notification-badge {
-    background-color: #ff6b6b;
-    color: white;
-    border-radius: 50%;
+    background-color: transparent;
+    color: #ff6b6b;
+    border-radius: 0;
     padding: 4px 10px;
     font-size: 12px;
     font-weight: bold;
@@ -1057,7 +1022,7 @@ main {
     color: #000;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     font-weight: bold;
@@ -1077,7 +1042,7 @@ main {
 .notification-item {
     background: #1c1c21;
     border: 1px solid #2a2a32;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 16px;
     margin-bottom: 12px;
     display: flex;
@@ -1136,7 +1101,7 @@ main {
     display: inline-block;
     padding: 4px 8px;
     background-color: #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 12px;
     color: #47d4ff;
     font-weight: 500;
@@ -1153,16 +1118,6 @@ main {
     align-items: flex-start;
 }
 
-.action-btn {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background-color 0.3s;
-    white-space: nowrap;
-}
-
 .btn-mark-read {
     background-color: #47d4ff;
     color: #000;
@@ -1170,15 +1125,6 @@ main {
 
 .btn-mark-read:hover {
     background-color: #5be0ff;
-}
-
-.btn-delete {
-    background-color: #ff6b6b;
-    color: #fff;
-}
-
-.btn-delete:hover {
-    background-color: #ff8080;
 }
 
 .btn-view-order {
@@ -1196,10 +1142,6 @@ main {
     color: #999;
 }
 
-.empty-state-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-}
 
 .empty-state-text {
     font-size: 18px;
@@ -1219,7 +1161,7 @@ main {
 .pagination span {
     padding: 8px 12px;
     border: 1px solid #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     text-decoration: none;
     color: #e8ff47;
     transition: background-color 0.3s;
@@ -1248,7 +1190,7 @@ main {
     padding: 8px 14px;
     border: 1px solid #2a2a32;
     background-color: #1c1c21;
-    border-radius: 4px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 14px;
     transition: all 0.3s;
@@ -1289,7 +1231,7 @@ main {
     min-width: 120px;
     background: #1c1c21;
     border: 1px solid #2a2a32;
-    border-radius: 8px;
+    border-radius: 0;
     padding: 14px 10px;
     text-align: center;
     cursor: pointer;
@@ -1306,7 +1248,7 @@ main {
 .status-badge {
     display: inline-block;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 11px;
     font-weight: bold;
     letter-spacing: 0.3px;
@@ -1324,7 +1266,7 @@ main {
 .orders-table-wrapper {
     overflow-x: auto;
     margin-top: 10px;
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid #2a2a32;
 }
 
@@ -1356,7 +1298,7 @@ main {
 .status-select-form select {
     padding: 6px 8px;
     font-size: 12px;
-    border-radius: 4px;
+    border-radius: 0;
     background: #0d0d0f;
     color: #f0f0f0;
     border: 1px solid #2a2a32;
@@ -1367,7 +1309,7 @@ main {
     background: #e8ff47;
     color: #000;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: bold;
     cursor: pointer;
@@ -1386,7 +1328,7 @@ main {
 .btn-quick {
     padding: 5px 10px;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 11px;
     font-weight: bold;
     cursor: pointer;
@@ -1409,7 +1351,7 @@ main {
     align-items: center;
     background: #1c1c21;
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid #2a2a32;
     margin-bottom: 20px;
 }
@@ -1424,7 +1366,7 @@ main {
     flex: 1;
     padding: 10px;
     border: 1px solid #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     background: #0d0d0f;
     color: #f0f0f0;
     font-size: 14px;
@@ -1439,7 +1381,7 @@ main {
     font-size: 14px;
     cursor: pointer;
     padding: 10px 16px;
-    border-radius: 4px;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1452,7 +1394,7 @@ main {
 .filter-bar select {
     padding: 9px 10px;
     border: 1px solid #2a2a32;
-    border-radius: 4px;
+    border-radius: 0;
     background: #0d0d0f;
     color: #f0f0f0;
     font-size: 13px;
@@ -1460,10 +1402,9 @@ main {
     min-width: 160px;
 }
 
-.empty-message { text-align: center; color: #888; padding: 40px 20px; font-style: italic; }
-
 @media (max-width: 768px) {
     .orders-table th:nth-child(4),
     .orders-table td:nth-child(4) { display: none; }
     .status-select-form { flex-direction: column; }
 }
+

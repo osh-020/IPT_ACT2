@@ -79,7 +79,7 @@ $tax = $subtotal * 0.12; // 12% tax
 $total = $subtotal + $tax;
 ?>
 
-<?php include '../includes/header.php'; ?>
+<?php include 'header.php'; ?>
 
 <main class="main-content">
     <div class="cart-container">
@@ -189,4 +189,5 @@ $total = $subtotal + $tax;
     });
 </script>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'footer.php'; ?>
+

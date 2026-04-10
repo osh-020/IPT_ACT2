@@ -172,44 +172,7 @@ function statusBadge($status) {
     return "<span class=\"status-badge {$s['class']}\">{$s['label']}</span>";
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Orders</title>
-    <link rel="icon" type="image/png" href="../includes/website_pic/logo.png">
-    <link rel="stylesheet" href="../includes/admin_style.css">
-</head>
-<body class="view_orders">
-
-<!-- Admin Header -->
-<header class="admin-header">
-    <div class="admin-header-container">
-        <!-- Logo Section -->
-        <div class="admin-logo">
-            <a href="index.php" class="admin-logo-link">
-                <img src="../includes/website_pic/logo.png" alt="COMPUTRONIUM Logo" class="admin-logo-img">
-                <h1>COMPUTRONIUM Admin</h1>
-            </a>
-        </div>
-
-        <!-- Admin Navigation -->
-        <nav class="admin-nav">
-            <ul class="admin-nav-menu">
-                <li><a href="index.php" class="admin-nav-link">Dashboard</a></li>
-                <li><a href="manage_product.php" class="admin-nav-link">Products</a></li>
-                <li><a href="view_order.php" class="admin-nav-link active">Orders</a></li>
-                <li><a href="notifications.php" class="admin-nav-link">Notifications<?php if ($adminUnreadCount > 0): ?> <span style="display: inline-block; background: #ff4444; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; font-size: 12px; margin-left: 5px;"><?php echo $adminUnreadCount; ?></span><?php endif; ?></a></li>
-            </ul>
-        </nav>
-
-        <!-- Admin Actions -->
-        <div class="admin-actions">
-            <a href="upload_product.php" class="admin-btn-primary">New Product</a>
-        </div>
-    </div>
-</header>
+<?php include("header.php"); ?>
 
 <div class="container">
     <h2>View Orders</h2>

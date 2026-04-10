@@ -117,7 +117,7 @@ $user_stmt->close();
 
 ?>
 
-<?php include '../includes/header.php'; ?>
+<?php include 'header.php'; ?>
 
 <main class="main-content">
     <div class="checkout-container">
@@ -227,4 +227,5 @@ $user_stmt->close();
     </div>
 </main>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'footer.php'; ?>
+

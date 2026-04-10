@@ -181,43 +181,38 @@ function formatCustomerNotificationTime($timestamp) {
 function getCustomerNotificationStyle($type) {
     $styles = [
         'order' => [
-            'icon' => '📦',
+            
             'color' => '#007bff',
             'label' => 'Order',
             'bg_color' => '#e7f3ff'
         ],
         'shipped' => [
-            'icon' => '🚚',
+           
             'color' => '#28a745',
             'label' => 'Shipped',
             'bg_color' => '#e8f5e9'
         ],
         'delivered' => [
-            'icon' => '✅',
             'color' => '#20c997',
             'label' => 'Delivered',
             'bg_color' => '#e0f2f1'
         ],
         'cancelled' => [
-            'icon' => '❌',
             'color' => '#dc3545',
             'label' => 'Cancelled',
             'bg_color' => '#ffebee'
         ],
         'refunded' => [
-            'icon' => '💰',
             'color' => '#ff9800',
             'label' => 'Refunded',
             'bg_color' => '#fff3e0'
         ],
         'system' => [
-            'icon' => '⚙️',
             'color' => '#6c757d',
             'label' => 'System Alert',
             'bg_color' => '#f5f5f5'
         ],
         'message' => [
-            'icon' => '💬',
             'color' => '#17a2b8',
             'label' => 'Message',
             'bg_color' => '#e0f7fa'

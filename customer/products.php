@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../includes/header.php';
+include 'header.php';
 include '../includes/db_connect.php';
 
 // Get search and filter parameters (from GET or POST)
@@ -315,4 +315,5 @@ if ($categoryResult) {
     </script>
 </main>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'footer.php'; ?>
+

@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="../includes/customer_style.css">
 </head>
 <body>
-    <?php include '../includes/header.php'; ?>
+    <?php include 'header.php'; ?>
 
     <div class="edit-profile-container">
         <h1>Edit Profile</h1>
@@ -137,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
     </div>
 
-    <?php include '../includes/footer.php'; ?>
+    <?php include 'footer.php'; ?>
 </body>
 </html>
+

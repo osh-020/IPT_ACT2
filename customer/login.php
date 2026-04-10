@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
-<?php include '../includes/header.php'; ?>
+<?php include 'header.php'; ?>
 
 <main class="main-content">
     <div class="auth-container">
@@ -108,4 +108,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </main>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'footer.php'; ?>
+

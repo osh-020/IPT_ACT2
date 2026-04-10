@@ -1,7 +1,7 @@
 <?php
 // Session already started in calling pages
-require_once dirname(__FILE__) . '/customer_notifications.php';
-require_once dirname(__FILE__) . '/db_connect.php';
+require_once dirname(__FILE__) . '/../includes/customer_notifications.php';
+require_once dirname(__FILE__) . '/../includes/db_connect.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -109,3 +109,4 @@ require_once dirname(__FILE__) . '/db_connect.php';
     </header>
 
     <!-- Main Content Starts Below Header -->
+

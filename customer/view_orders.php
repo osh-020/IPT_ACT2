@@ -97,7 +97,7 @@ $orders_stmt->close();
     <link rel="stylesheet" href="../includes/customer_style.css">
 </head>
 <body>
-    <?php include '../includes/header.php'; ?>
+    <?php include 'header.php'; ?>
 
     <main class="main-content">
         <div class="orders-container">
@@ -203,6 +203,7 @@ $orders_stmt->close();
         </div>
     </main>
 
-    <?php include '../includes/footer.php'; ?>
+    <?php include 'footer.php'; ?>
 </body>
 </html>
+

@@ -24,7 +24,7 @@ $adminUnreadCount = getAdminUnreadNotificationsCount($conn);
         <div class="admin-header-container">
             <!-- Logo Section -->
             <div class="admin-logo">
-                <a href="index.php" class="admin-logo-link">
+                <a href="dashboard.php" class="admin-logo-link">
                     <img src="../includes/website_pic/logo.png" alt="COMPUTRONIUM Logo" class="admin-logo-img">
                     <h1>COMPUTRONIUM Admin</h1>
                 </a>
@@ -33,7 +33,7 @@ $adminUnreadCount = getAdminUnreadNotificationsCount($conn);
             <!-- Admin Navigation -->
             <nav class="admin-nav">
                 <ul class="admin-nav-menu">
-                    <li><a href="index.php" class="admin-nav-link active">Dashboard</a></li>
+                    <li><a href="dashboard.php" class="admin-nav-link active">Dashboard</a></li>
                     <li><a href="manage_product.php" class="admin-nav-link">Products</a></li>
                     <li><a href="view_order.php" class="admin-nav-link">Orders</a></li>
                     <li><a href="notifications.php" class="admin-nav-link">Notifications<?php if ($adminUnreadCount > 0): ?> <span style="display: inline-block; background: #ff4444; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; font-size: 12px; margin-left: 5px;"><?php echo $adminUnreadCount; ?></span><?php endif; ?></a></li>
@@ -158,12 +158,5 @@ $adminUnreadCount = getAdminUnreadNotificationsCount($conn);
             </section>
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="admin-footer">
-        <div class="footer-container">
-            <p>&copy; 2026 COMPUTRONIUM. All rights reserved.</p>
-        </div>
-    </footer>
 </body>
 </html>

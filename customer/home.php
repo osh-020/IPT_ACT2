@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../includes/header.php';
+include 'header.php';
 include '../includes/db_connect.php';
 
 // Get featured products (newest 6 products)
@@ -108,4 +108,5 @@ if ($categoriesResult) {
     </section>
 </main>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'footer.php'; ?>
+

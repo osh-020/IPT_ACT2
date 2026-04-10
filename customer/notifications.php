@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../includes/header.php';
+require_once './header.php';
 require_once '../includes/db_connect.php';
 require_once '../includes/customer_notifications.php';
 
@@ -79,7 +79,7 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                     <div style="padding: 20px; border-bottom: 1px solid #ddd; background-color: #2a2a32; display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                <span style="font-size: 24px; background-color: rgba(255,255,255,0.2); padding: 5px 8px; border-radius: 4px;"><?php echo $style['icon']; ?></span>
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background-color: #dc3545; border-radius: 50%; color: white; font-weight: bold; font-size: 14px;">1</span>
                                 <h3 style="margin: 0; color: <?php echo !$notif['is_read'] ? '#fff' : '#eee'; ?>;">
                                     <?php echo htmlspecialchars($notif['title']); ?>
                                     <?php if (!$notif['is_read']): ?>
@@ -87,10 +87,10 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                                     <?php endif; ?>
                                 </h3>
                             </div>
-                            <p style="margin: 0 0 8px 34px; color: <?php echo !$notif['is_read'] ? '#f0f0f0' : '#ccc'; ?>;">
+                            <p style="margin: 0 0 8px 0; color: <?php echo !$notif['is_read'] ? '#f0f0f0' : '#ccc'; ?>;">
                                 <?php echo htmlspecialchars($notif['message']); ?>
                             </p>
-                            <p style="margin: 0 0 0 34px; color: <?php echo !$notif['is_read'] ? '#e0e0e0' : '#bbb'; ?>; font-size: 14px;">
+                            <p style="margin: 0 0 0 0; color: <?php echo !$notif['is_read'] ? '#e0e0e0' : '#bbb'; ?>; font-size: 14px;">
                                 <?php echo $time_text; ?>
                                 <?php if ($notif['order_id']): ?>
                                     | Order #<?php echo $notif['order_id']; ?>
@@ -149,4 +149,5 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
     </div>
 </main>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'footer.php'; ?>
+
