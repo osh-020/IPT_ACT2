@@ -94,11 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Mobile number must be in Philippine format (e.g., 09XXXXXXXXX - 11 digits starting with 09)";
     }
 
-    // Address: Required, minimum 50 characters
+    // Address: Required
     if (empty($address)) {
         $errors[] = "Address is required";
-    } elseif (strlen($address) < 50) {
-        $errors[] = "Address must be at least 50 characters long";
     }
 
     // ZIP Code: Numeric, 4 digits
@@ -229,8 +227,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="address">Address * <span style="font-size: 12px; color: #999;">(Min 50 characters)</span></label>
-                    <textarea id="address" name="address" rows="3" minlength="50" maxlength="500" placeholder="Enter your complete address (at least 50 characters)" title="Address must be at least 50 characters long" required><?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?></textarea>
+                    <label for="address">Address *</label>
+                    <textarea id="address" name="address" rows="3" maxlength="500" placeholder="Enter your complete address" title="Please enter your address" required><?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?></textarea>
                 </div>
 
                 <div class="form-row">
