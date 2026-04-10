@@ -160,6 +160,19 @@ if ($result) {
     }
 }
 
+$orderItems = [];
+foreach ($orders as $order) {
+    $oid = intval($order['order_id']);
+    $itemResult = $conn->query("SELECT product_name, quantity FROM order_items WHERE order_id = $oid");
+    if ($itemResult) {
+        while ($item = $itemResult->fetch_assoc()) {
+            $orderItems[$oid][] = $item;
+        }
+    }
+}
+
+
+
 // Count per status for summary strip
 $statusCounts = [];
 $countResult = $conn->query("SELECT order_status as status, COUNT(*) as cnt FROM orders GROUP BY order_status");
