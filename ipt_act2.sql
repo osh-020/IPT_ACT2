@@ -154,6 +154,13 @@ ALTER TABLE `order_ratings`
   ADD UNIQUE KEY `order_id` (`order_id`);
 
 --
+-- Indexes for table `rating`
+--
+ALTER TABLE `rating`
+  ADD PRIMARY KEY (`rating_id`),
+  ADD KEY `order_id` (`order_id`);
+
+--
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
@@ -171,6 +178,12 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `order_ratings`
   ADD CONSTRAINT `order_ratings_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `rating`
+--
+ALTER TABLE `rating`
+  ADD CONSTRAINT `rating_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE;
 
 -- =====================================================
 -- AUTO_INCREMENT FOR DUMPED TABLES
@@ -205,6 +218,24 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `order_ratings`
   MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rating`
+--
+ALTER TABLE `rating`
+  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+-- Table structure for table `rating`
+-- --------------------------------------------------------
+
+CREATE TABLE `rating` (
+  `rating_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `review` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- =====================================================
 -- TABLE STRUCTURE FOR NOTIFICATIONS
