@@ -13,6 +13,21 @@ if (!isset($_SESSION['cart_selected'])) {
     $_SESSION['cart_selected'] = [];
 }
 
+// Handle Select All / Deselect All
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['select_all_action'])) {
+    if ($_POST['select_all_action'] == 'select') {
+        // Select all items in cart
+        if (isset($_SESSION['cart'])) {
+            foreach ($_SESSION['cart'] as $product_id => $item) {
+                $_SESSION['cart_selected'][$product_id] = true;
+            }
+        }
+    } elseif ($_POST['select_all_action'] == 'deselect') {
+        // Deselect all items
+        $_SESSION['cart_selected'] = [];
+    }
+}
+
 // Handle Checkbox Selection
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id']) && isset($_POST['is_toggle'])) {
     $product_id = intval($_POST['product_id']);
@@ -99,7 +114,12 @@ $total = $subtotal + $tax;
             echo "<table class='cart-table'>";
             echo "<thead>";
             echo "<tr>";
-            echo "<th style='width: 40px;'><input type='checkbox' id='select-all-checkbox'></th>";
+            echo "<th style='width: 40px;'>";
+            echo "<form method='POST' action='cart.php' id='select-all-form' style='display: inline;'>";
+            echo "<input type='checkbox' id='select-all-checkbox'>";
+            echo "<input type='hidden' name='select_all_action' id='select-all-action-input'>";
+            echo "</form>";
+            echo "</th>";
             echo "<th>Product</th>";
             echo "<th>Price</th>";
             echo "<th>Quantity</th>";
@@ -119,7 +139,7 @@ $total = $subtotal + $tax;
                 echo "<form method='POST' action='cart.php' style='display: inline;'>";
                 echo "<input type='hidden' name='product_id' value='" . $item['id'] . "'>";
                 echo "<input type='hidden' name='is_toggle' value='1'>";
-                echo "<input type='checkbox' name='toggle_selection' value='1' class='item-checkbox' " . $checked . " onchange='this.form.submit();'>";
+                echo "<input type='checkbox' name='toggle_selection' value='1' class='item-checkbox' data-product-id='" . $item['id'] . "' " . $checked . ">";
                 echo "</form>";
                 echo "</td>";
                 echo "<td>" . htmlspecialchars($item['name']) . "</td>";
@@ -178,14 +198,42 @@ $total = $subtotal + $tax;
 <!-- Embedded styles moved to includes/customer_css.css -->
 
 <script>
-    // Just submit form when checkbox is clicked
+    // Handle select all / deselect all checkbox
     document.addEventListener('DOMContentLoaded', function() {
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
+        const selectAllForm = document.getElementById('select-all-form');
+        const selectAllActionInput = document.getElementById('select-all-action-input');
         const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+
+        // Select All checkbox handler
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    selectAllActionInput.value = 'select';
+                } else {
+                    selectAllActionInput.value = 'deselect';
+                }
+                selectAllForm.submit();
+            });
+        }
+
+        // Individual item checkbox handler
         itemCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 this.form.submit();
             });
         });
+
+        // Update select-all checkbox state based on individual checkboxes
+        function updateSelectAllCheckbox() {
+            if (selectAllCheckbox && itemCheckboxes.length > 0) {
+                const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+                const someChecked = Array.from(itemCheckboxes).some(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            }
+        }
+        updateSelectAllCheckbox();
     });
 </script>
 

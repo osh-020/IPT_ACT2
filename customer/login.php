@@ -88,13 +88,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <form method="POST" action="login.php" class="auth-form">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" minlength="5" maxlength="15" placeholder="Enter your username (5-15 characters)" title="Username must be 5-15 characters" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" minlength="8" maxlength="20" placeholder="Enter your password (8-20 characters)" title="Password must be 8-20 characters" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Login</button>

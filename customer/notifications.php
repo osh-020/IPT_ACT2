@@ -79,7 +79,6 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                     <div style="padding: 20px; border-bottom: 1px solid #ddd; background-color: #2a2a32; display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; background-color: #dc3545; border-radius: 50%; color: white; font-weight: bold; font-size: 14px;">1</span>
                                 <h3 style="margin: 0; color: <?php echo !$notif['is_read'] ? '#fff' : '#eee'; ?>;">
                                     <?php echo htmlspecialchars($notif['title']); ?>
                                     <?php if (!$notif['is_read']): ?>

@@ -623,62 +623,6 @@ main {
 }
 
 /* ===============================================
-   RESPONSIVE DESIGN
-   =============================================== */
-
-@media (max-width: 768px) {
-    .navbar-container {
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .nav-menu {
-        order: 3;
-        width: 100%;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .navbar-right {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-    }
-
-    .search-form {
-        width: 100%;
-    }
-
-    .search-input {
-        width: 100%;
-    }
-
-    .hero-content h1 {
-        font-size: 32px;
-    }
-
-    .hero-content p {
-        font-size: 16px;
-    }
-
-    .products-container {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        display: none;
-    }
-
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    }
-
-    .categories-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* ===============================================
    AUTHENTICATION PAGES (LOGIN/REGISTER)
    =============================================== */
 
@@ -769,7 +713,7 @@ main {
 }
 
 .error-message {
-    background: #2a1c1c;
+    background: transparent;
     border: 1px solid #ff4747;
     color: #ff4747;
     padding: 15px;
@@ -1179,36 +1123,6 @@ main {
 
 .btn-cancel:hover {
     background: #777;
-}
-
-/* Responsive Modal */
-@media (max-width: 768px) {
-    .modal-body {
-        grid-template-columns: 1fr;
-        padding: 20px;
-    }
-
-    .modal-content {
-        width: 95%;
-        margin: 20% auto;
-    }
-
-    .modal-details h2 {
-        font-size: 22px;
-    }
-
-    .modal-price {
-        font-size: 20px;
-    }
-
-    .modal-actions {
-        flex-direction: column;
-    }
-
-    .modal-actions input,
-    .modal-actions button {
-        width: 100%;
-    }
 }
 
 .btn-secondary {
@@ -1654,159 +1568,7 @@ main {
     margin: 5px 0;
 }
 
-/* ===============================================
-   RESPONSIVE DESIGN
-   =============================================== */
 
-@media (max-width: 768px) {
-    .navbar-container {
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .nav-menu {
-        order: 3;
-        width: 100%;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .navbar-right {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-    }
-
-    .search-form {
-        width: 100%;
-    }
-
-    .search-input {
-        width: 100%;
-    }
-
-    .hero-content h1 {
-        font-size: 32px;
-    }
-
-    .hero-content p {
-        font-size: 16px;
-    }
-
-    .products-container {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        display: none;
-    }
-
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    }
-
-    .categories-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .auth-box {
-        padding: 25px;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .cart-wrapper {
-        grid-template-columns: 1fr;
-    }
-
-    .cart-summary {
-        height: auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .logo h1 {
-        font-size: 18px;
-    }
-
-    .hero {
-        padding: 30px 20px;
-    }
-
-    .hero-content h1 {
-        font-size: 24px;
-    }
-
-    .featured-section h2,
-    .categories-section h2 {
-        font-size: 22px;
-    }
-
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .product-image {
-        height: 150px;
-    }
-
-    .categories-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .info-section {
-        grid-template-columns: 1fr;
-    }
-
-    .auth-box {
-        padding: 20px;
-    }
-
-    .auth-box h2 {
-        font-size: 20px;
-    }
-
-    .cart-table {
-        font-size: 12px;
-    }
-
-    .cart-table th,
-    .cart-table td {
-        padding: 10px 5px;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .checkout-wrapper {
-        grid-template-columns: 1fr;
-    }
-
-    .billing-info {
-        grid-template-columns: 1fr;
-    }
-
-    .contact-wrapper {
-        grid-template-columns: 1fr;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .about-hero,
-    .contact-hero {
-        padding: 40px 20px;
-    }
-
-    .about-hero h1,
-    .contact-hero h1 {
-        font-size: 28px;
-    }
-}
 
 /* ===============================================
    CUSTOMER EMBEDDED STYLES - NAMESPACED TO #customer_css
@@ -2096,30 +1858,5 @@ button:disabled {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-}
-
-@media (max-width: 768px) {
-    .order-header {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .order-items-table {
-        font-size: 14px;
-    }
-
-    .order-items-table th,
-    .order-items-table td {
-        padding: 8px;
-    }
-
-    .order-summary {
-        flex-direction: column;
-        gap: 15px;
-        padding: 15px;
-    }
-
-    .summary-item {
-        align-items: flex-start;
-    }
 }
 

@@ -280,25 +280,6 @@ ALTER TABLE `admin_notifications`
 ALTER TABLE `admin_notifications`
   MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
 
--- =====================================================
--- SAMPLE DATA - USERS
--- =====================================================
--- Sample User Accounts for Testing
--- Passwords are hashed using bcrypt
-
--- User 1: John Doe
--- Password: Test1234
-INSERT INTO `users` (`full_name`, `email`, `username`, `password`, `age`, `gender`, `civil_status`, `mobile_number`, `address`, `zip_code`) 
-VALUES ('John Doe', 'john@example.com', 'johndoe', '$2y$10$mZLa8Pys1QsGPv.D4N0vPeI4KXR/BHLbXb9d5Z8y7q5k4K3J2K9Jm', 28, 'Male', 'Single', '09123456789', '123 Main Street, Lingayen, Pangasinan', '2401');
-
--- User 2: Maria Santos
--- Password: Password123
-INSERT INTO `users` (`full_name`, `email`, `username`, `password`, `age`, `gender`, `civil_status`, `mobile_number`, `address`, `zip_code`) 
-VALUES ('Maria Santos', 'maria@example.com', 'mariasantos', '$2y$10$d5PYk8XvZqR2B3n7L9mXxOK4j5L6K8Q2W9E5R7T2U4V6W8X9Y0Z1b', 32, 'Female', 'Married', '09198765432', '456 Oak Avenue, Dagupan, Pangasinan', '2400');
--- =====================================================
--- SAMPLE DATA - PRODUCTS
--- =====================================================
--- Insert 15 Sample PC Components for Testing
 
 INSERT INTO `products` (`name`, `category`, `brand`, `price`, `stock`, `description`, `keywords`, `image`) VALUES
 ('Intel Core i5-13600K', 'CPU', 'Intel', 365.99, 25, 'High-performance CPU with 14 cores. Perfect for gaming and content creation. Base clock 3.5 GHz, boost up to 5.1 GHz.', 'processor, cpu, intel, gaming, core i5', 'cpu_intel_i5.jpg'),
