@@ -115,18 +115,22 @@ if (isset($_GET['check_can_review'])) {
 
 // Handle Review Submission
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit_review'])) {
+    $review_error = '';
+    
     if (isset($_SESSION['user_id'])) {
         $product_id = intval($_POST['product_id']);
         $rating = intval($_POST['rating']);
         $review_text = htmlspecialchars(trim($_POST['review_text'] ?? ''));
         
-        // Check if user has purchased this product
-        if (userHasPurchasedProduct($_SESSION['user_id'], $product_id, $conn)) {
-            // Get the first completed order for this product
+        if (empty($product_id) || $rating < 1 || $rating > 5) {
+            $review_error = "Invalid review data.";
+        } else if (userHasPurchasedProduct($_SESSION['user_id'], $product_id, $conn)) {
+            // Get the most recent completed order for this product
             $order_stmt = $conn->prepare("
                 SELECT o.order_id FROM orders o
                 JOIN order_items oi ON oi.order_id = o.order_id
                 WHERE o.user_id = ? AND oi.product_id = ? AND o.order_status = 'Completed'
+                ORDER BY o.order_date DESC
                 LIMIT 1
             ");
             $order_stmt->bind_param("ii", $_SESSION['user_id'], $product_id);
@@ -135,15 +139,28 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit_review'])) {
             $order_data = $order_result->fetch_assoc();
             $order_stmt->close();
             
-            if ($order_data && $rating >= 1 && $rating <= 5) {
-                addProductReview($_SESSION['user_id'], $product_id, $order_data['order_id'], $rating, $review_text, $conn);
+            if ($order_data) {
+                $add_result = addProductReview($_SESSION['user_id'], $product_id, $order_data['order_id'], $rating, $review_text, $conn);
+                if ($add_result) {
+                    echo "<script>alert('✓ Review submitted successfully!'); window.location.href=window.location.href;</script>";
+                    exit;
+                } else {
+                    $review_error = "Error saving review. Please try again.";
+                }
+            } else {
+                $review_error = "No completed order found for this product.";
             }
+        } else {
+            $review_error = "You can only review products you've purchased.";
         }
+    } else {
+        $review_error = "Please log in to submit a review.";
     }
     
-    // Redirect to same page to refresh reviews
-    header("Location: " . $_SERVER['REQUEST_URI']);
-    exit;
+    if (!empty($review_error)) {
+        echo "<script>alert('⚠ " . addslashes($review_error) . "'); window.location.href=window.location.href;</script>";
+        exit;
+    }
 }
 
 // Handle Add to Cart
