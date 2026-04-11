@@ -118,7 +118,7 @@ if ($categoriesResult) {
                 $imageName = addslashes($image);
                 
                 echo "
-                <div class='product-card' onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '$imageName', '$description', " . $product['stock'] . ", '$brand', '$category')\" style='cursor: pointer;'>
+                <div class='product-card' onclick=\"window.location.href='products.php?search=" . urlencode($name) . "';\" style='cursor: pointer;'>
                     <div class='product-image'>
                         <img src='../includes/product_pic/$image' alt='$name' onerror=\"this.src='../includes/product_pic/cpu_intel_i5.jpg'\">
                     </div>
@@ -126,7 +126,6 @@ if ($categoriesResult) {
                         <h3>$name</h3>
                         <p class='category'>" . htmlspecialchars($product['category']) . "</p>
                         <p class='price'>₱$price</p>
-                        <div class='btn btn-small' style='text-align: center; background-color: #e8ff47; color: #000; cursor: pointer;'>View Details</div>
                     </div>
                 </div>
                 ";

@@ -753,11 +753,6 @@ main {
     margin-bottom: 8px;
 }
 
-.dashboard-date {
-    color: #888;
-    font-size: 14px;
-}
-
 /* Stats Grid */
 .stats-grid {
     display: grid;
@@ -850,10 +845,6 @@ main {
 .action-card:hover {
     border-color: #e8ff47;
     background: rgba(232, 255, 71, 0.05);
-}
-
-.action-icon {
-    display: none;
 }
 
 .action-card h4 {
