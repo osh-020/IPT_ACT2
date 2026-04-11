@@ -112,7 +112,7 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                 <?php endif; ?>
                 <?php if ($total_notifications > 0): ?>
                     <form method="POST" style="display: inline;">
-                        <button type="submit" name="delete_all_notifications" class="btn btn-danger" onclick="return confirm('Delete all notifications? This cannot be undone.')" style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        <button type="submit" name="delete_all_notifications" class="btn btn-danger" onclick="return confirm('Delete all notifications? This cannot be undone.')" style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 0; cursor: pointer;">
                             Delete All
                         </button>
                     </form>
@@ -137,19 +137,19 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                 $filter_url = 'notifications.php?filter=' . $filter_key;
                 $style = $isActive ? 'background-color: #e8ff47; color: #000; font-weight: bold;' : 'background-color: #2a2a32; color: #fff;';
             ?>
-                <a href="<?php echo $filter_url; ?>" style="<?php echo $style; ?> padding: 10px 15px; border-radius: 4px; text-decoration: none; border: 1px solid #e8ff47; cursor: pointer; transition: all 0.3s;">
+                <a href="<?php echo $filter_url; ?>" style="<?php echo $style; ?> padding: 10px 15px; border-radius: 0; text-decoration: none; border: 1px solid #e8ff47; cursor: pointer; transition: all 0.3s;">
                     <?php echo $filter_label; ?>
                 </a>
             <?php endforeach; ?>
         </div>
 
         <?php if (empty($notifications)): ?>
-            <div style="text-align: center; padding: 50px 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <div style="text-align: center; padding: 50px 20px; border: 1px solid #ddd; border-radius: 0;">
                 <p style="font-size: 18px; color: #666;">No notifications yet</p>
                 <p style="color: #999;">Your notifications will appear here</p>
             </div>
         <?php else: ?>
-            <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+            <div style="border: 1px solid #ddd; border-radius: 0; overflow: hidden;">
                 <?php foreach ($notifications as $notif): 
                     $style = getNotificationStyle($notif['type']);
                     $read_class = $notif['is_read'] ? 'read' : 'unread';
@@ -181,14 +181,14 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                                 <?php if (!$notif['is_read']): ?>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="notification_id" value="<?php echo $notif['notification_id']; ?>">
-                                        <button type="submit" name="mark_read" class="btn btn-sm" style="padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                        <button type="submit" name="mark_read" class="btn btn-sm" style="padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 0; cursor: pointer;">
                                             Mark Read
                                         </button>
                                     </form>
                                 <?php endif; ?>
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="notification_id" value="<?php echo $notif['notification_id']; ?>">
-                                    <button type="submit" name="delete_notification" class="btn btn-sm" onclick="return confirm('Delete this notification?')" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    <button type="submit" name="delete_notification" class="btn btn-sm" onclick="return confirm('Delete this notification?')" style="padding: 8px 12px; background-color: #f44336; color: white; border: none; border-radius: 0; cursor: pointer;">
                                         Delete
                                     </button>
                                 </form>
@@ -207,7 +207,7 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
 
                     <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                         <?php if ($i == $page): ?>
-                            <span style="margin: 0 5px; padding: 10px 15px; background-color: #007bff; color: white; border-radius: 4px;">
+                            <span style="margin: 0 5px; padding: 10px 15px; background-color: #007bff; color: white; border-radius: 0;">
                                 <?php echo $i; ?>
                             </span>
                         <?php else: ?>

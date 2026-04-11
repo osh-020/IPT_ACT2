@@ -143,7 +143,7 @@ $orders_stmt->close();
                     $filter_url = 'view_orders.php?filter=' . $filter_key;
                     $style = $isActive ? 'background-color: #e8ff47; color: #000; font-weight: bold;' : 'background-color: #2a2a32; color: #fff;';
                 ?>
-                    <a href="<?php echo $filter_url; ?>" style="<?php echo $style; ?> padding: 10px 15px; border-radius: 4px; text-decoration: none; border: 1px solid #e8ff47; cursor: pointer; transition: all 0.3s;">
+                    <a href="<?php echo $filter_url; ?>" style="<?php echo $style; ?> padding: 10px 15px; border-radius: 0; text-decoration: none; border: 1px solid #e8ff47; cursor: pointer; transition: all 0.3s;">
                         <?php echo $filter_label; ?>
                     </a>
                 <?php endforeach; ?>

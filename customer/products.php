@@ -202,25 +202,16 @@ if ($categoryResult) {
                         
                         echo "
                         <div class='product-card'>
-                            <div class='product-image' onclick=\"openProductModal($productId, '$name', '$price', '$fullDescription', '$stock', '$image', '$brand', '$category')\" style='cursor: pointer;'>
+                            <div class='product-image' onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '" . addslashes($fullDescription) . "', '$stock', '" . addslashes($image) . "', '" . addslashes($brand) . "', '" . addslashes($category) . "')\" style='cursor: pointer;'>
                                 <img src='../includes/product_pic/$image' alt='$name' onerror=\"this.src='../includes/product_pic/cpu_intel_i5.jpg'\">
                             </div>
                             <div class='product-info'>
-                                <h3 onclick=\"openProductModal($productId, '$name', '$price', '$fullDescription', '$stock', '$image', '$brand', '$category')\" style='cursor: pointer;'>$name</h3>
+                                <h3 onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '" . addslashes($fullDescription) . "', '$stock', '" . addslashes($image) . "', '" . addslashes($brand) . "', '" . addslashes($category) . "')\" style='cursor: pointer;'>$name</h3>
                                 <p class='brand'>Brand: $brand</p>
                                 <p class='description'>$shortDescription</p>
                                 <p class='price'>₱$price</p>
                                 <p class='stock'>Stock: $stock</p>
-                                <form method='POST' action='products.php'>
-                                    <input type='hidden' name='product_id' value='$productId'>
-                                    <input type='hidden' name='search' value='" . htmlspecialchars($searchQuery) . "'>
-                                    <input type='hidden' name='category' value='" . htmlspecialchars($filterCategory) . "'>
-                                    <input type='hidden' name='page' value='$currentPage'>
-                                    <div class='product-actions'>
-                                        <input type='number' name='quantity' value='1' min='1' max='$stock' class='qty-input'>
-                                        <button type='submit' name='add_to_cart' value='1' class='btn btn-add'>Add to Cart</button>
-                                    </div>
-                                </form>
+                                <div class='btn btn-add' onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '" . addslashes($fullDescription) . "', '$stock', '" . addslashes($image) . "', '" . addslashes($brand) . "', '" . addslashes($category) . "')\" style='cursor: pointer; text-align: center; background-color: #e8ff47; color: #000; padding: 8px; font-weight: 600; border-radius: 0;'>View Details</div>
                             </div>
                         </div>
                         ";
@@ -267,10 +258,21 @@ if ($categoryResult) {
                     
                     <form id="modalAddForm" method="POST" action="products.php">
                         <input type="hidden" name="product_id" id="modalProductId">
+                        <input type="hidden" name="search" id="modalSearch">
+                        <input type="hidden" name="category" id="modalCategory2">
+                        <input type="hidden" name="page" id="modalPage">
+                        
+                        <!-- Quantity Controls -->
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                            <label style="color: #e8ff47; font-weight: 600;">Quantity:</label>
+                            <button type="button" onclick="decreaseQuantity()" style="background-color: #e8ff47; color: #000; border: none; padding: 10px 15px; font-weight: bold; cursor: pointer; border-radius: 0; font-size: 18px;">-</button>
+                            <input type="number" id="modalQuantity" name="quantity" value="1" min="1" style="width: 60px; padding: 8px; text-align: center; background-color: #2a2a32; color: #f0f0f0; border: 1px solid #e8ff47; border-radius: 0;" onchange="validateQuantity()">
+                            <button type="button" onclick="increaseQuantity()" style="background-color: #e8ff47; color: #000; border: none; padding: 10px 15px; font-weight: bold; cursor: pointer; border-radius: 0; font-size: 18px;">+</button>
+                        </div>
+                        
                         <div class="modal-actions">
-                            <input type="number" name="quantity" id="modalQuantity" value="1" min="1" class="qty-input">
-                            <button type="submit" name="add_to_cart" value="1" class="btn btn-add">Add to Cart</button>
-                            <button type="button" onclick="closeProductModal()" class="btn btn-cancel">Close</button>
+                            <button type="submit" name="add_to_cart" value="1" class="btn btn-add" style="padding: 15px 30px; background-color: #e8ff47; color: #000; font-weight: 600; border: none; cursor: pointer; border-radius: 0; flex: 1; font-size: 16px;">Add to Cart</button>
+                            <button type="button" onclick="closeProductModal()" class="btn btn-cancel" style="padding: 15px 30px; background-color: #dc3545; color: white; font-weight: 600; border: none; cursor: pointer; border-radius: 0; font-size: 16px;">Close</button>
                         </div>
                     </form>
                 </div>
@@ -289,6 +291,10 @@ if ($categoryResult) {
             document.getElementById('modalBrand').textContent = brand;
             document.getElementById('modalCategory').textContent = category;
             document.getElementById('modalQuantity').max = stock;
+            document.getElementById('modalQuantity').value = 1;
+            document.getElementById('modalSearch').value = '<?php echo htmlspecialchars($searchQuery); ?>';
+            document.getElementById('modalCategory2').value = '<?php echo htmlspecialchars($filterCategory); ?>';
+            document.getElementById('modalPage').value = '<?php echo $currentPage; ?>';
             document.getElementById('productModal').style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
@@ -296,6 +302,32 @@ if ($categoryResult) {
         function closeProductModal() {
             document.getElementById('productModal').style.display = 'none';
             document.body.style.overflow = 'auto';
+        }
+        
+        function increaseQuantity() {
+            const quantityInput = document.getElementById('modalQuantity');
+            const maxStock = parseInt(quantityInput.max) || 999;
+            const currentQuantity = parseInt(quantityInput.value) || 1;
+            if (currentQuantity < maxStock) {
+                quantityInput.value = currentQuantity + 1;
+            }
+        }
+
+        function decreaseQuantity() {
+            const quantityInput = document.getElementById('modalQuantity');
+            const currentQuantity = parseInt(quantityInput.value) || 1;
+            if (currentQuantity > 1) {
+                quantityInput.value = currentQuantity - 1;
+            }
+        }
+
+        function validateQuantity() {
+            const quantityInput = document.getElementById('modalQuantity');
+            const maxStock = parseInt(quantityInput.max) || 999;
+            let value = parseInt(quantityInput.value) || 1;
+            if (value < 1) value = 1;
+            if (value > maxStock) value = maxStock;
+            quantityInput.value = value;
         }
 
         // Close modal when clicking outside of it
