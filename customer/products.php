@@ -201,17 +201,17 @@ if ($categoryResult) {
                         $category = htmlspecialchars($product['category'] ?? 'N/A');
                         
                         echo "
-                        <div class='product-card'>
-                            <div class='product-image' onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '" . addslashes($fullDescription) . "', '$stock', '" . addslashes($image) . "', '" . addslashes($brand) . "', '" . addslashes($category) . "')\" style='cursor: pointer;'>
+                        <div class='product-card' onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '" . addslashes($fullDescription) . "', '$stock', '" . addslashes($image) . "', '" . addslashes($brand) . "', '" . addslashes($category) . "')\" style='cursor: pointer;'>
+                            <div class='product-image'>
                                 <img src='../includes/product_pic/$image' alt='$name' onerror=\"this.src='../includes/product_pic/cpu_intel_i5.jpg'\">
                             </div>
                             <div class='product-info'>
-                                <h3 onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '" . addslashes($fullDescription) . "', '$stock', '" . addslashes($image) . "', '" . addslashes($brand) . "', '" . addslashes($category) . "')\" style='cursor: pointer;'>$name</h3>
+                                <h3>$name</h3>
                                 <p class='brand'>Brand: $brand</p>
                                 <p class='description'>$shortDescription</p>
                                 <p class='price'>₱$price</p>
                                 <p class='stock'>Stock: $stock</p>
-                                <div class='btn btn-add' onclick=\"openProductModal($productId, '" . addslashes($name) . "', '$price', '" . addslashes($fullDescription) . "', '$stock', '" . addslashes($image) . "', '" . addslashes($brand) . "', '" . addslashes($category) . "')\" style='cursor: pointer; text-align: center; background-color: #e8ff47; color: #000; padding: 8px; font-weight: 600; border-radius: 0;'>View Details</div>
+                                <div class='btn btn-add' style='text-align: center; background-color: #e8ff47; color: #000; padding: 8px; font-weight: 600; border-radius: 0;'>View Details</div>
                             </div>
                         </div>
                         ";
