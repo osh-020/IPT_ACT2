@@ -1,43 +1,9 @@
 <?php
 session_start();
-include 'header.php';
 include '../includes/db_connect.php';
 require_once '../includes/product_rating.php';
 
-// Get search and filter parameters (from GET or POST)
-$searchQuery = '';
-$filterCategory = '';
-$currentPage = 1;
-
-// Check GET first
-if (isset($_GET['search'])) {
-    $searchQuery = htmlspecialchars(trim($_GET['search']));
-}
-if (isset($_GET['category'])) {
-    $filterCategory = htmlspecialchars(trim($_GET['category']));
-}
-if (isset($_GET['page']) && is_numeric($_GET['page'])) {
-    $currentPage = (int)$_GET['page'];
-}
-
-// Check POST for same parameters (preserved from form)
-if (isset($_POST['search'])) {
-    $searchQuery = htmlspecialchars(trim($_POST['search']));
-}
-if (isset($_POST['category'])) {
-    $filterCategory = htmlspecialchars(trim($_POST['category']));
-}
-if (isset($_POST['page']) && is_numeric($_POST['page'])) {
-    $currentPage = (int)$_POST['page'];
-}
-
-$itemsPerPage = 12;
-
-// Initialize cart if not exists
-if (!isset($_SESSION['cart'])) {
-    $_SESSION['cart'] = [];
-}
-
+// Handle AJAX requests BEFORE including header (which outputs HTML)
 // Handle AJAX Review Requests
 if (isset($_GET['get_reviews'])) {
     header('Content-Type: application/json');
@@ -46,10 +12,10 @@ if (isset($_GET['get_reviews'])) {
     
     // Query reviews for this product
     $query = "
-        SELECT r.rating_id, r.rating, r.review, r.created_at, u.full_name
+        SELECT r.rating_id, r.rating, r.review, r.created_at, COALESCE(u.full_name, 'Anonymous') as full_name
         FROM order_ratings r
-        JOIN orders o ON o.order_id = r.order_id
-        JOIN users u ON u.user_id = o.user_id
+        LEFT JOIN orders o ON o.order_id = r.order_id
+        LEFT JOIN users u ON u.user_id = o.user_id
         WHERE r.product_id = ?
     ";
     
@@ -278,6 +244,43 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['checkout'])) {
     // Redirect to checkout
     header("Location: checkout.php");
     exit;
+}
+
+// Now include header (which outputs HTML) - only for page view, not AJAX
+include 'header.php';
+
+// Get search and filter parameters (from GET or POST)
+$searchQuery = '';
+$filterCategory = '';
+$currentPage = 1;
+
+// Check GET first
+if (isset($_GET['search'])) {
+    $searchQuery = htmlspecialchars(trim($_GET['search']));
+}
+if (isset($_GET['category'])) {
+    $filterCategory = htmlspecialchars(trim($_GET['category']));
+}
+if (isset($_GET['page']) && is_numeric($_GET['page'])) {
+    $currentPage = (int)$_GET['page'];
+}
+
+// Check POST for same parameters (preserved from form)
+if (isset($_POST['search'])) {
+    $searchQuery = htmlspecialchars(trim($_POST['search']));
+}
+if (isset($_POST['category'])) {
+    $filterCategory = htmlspecialchars(trim($_POST['category']));
+}
+if (isset($_POST['page']) && is_numeric($_POST['page'])) {
+    $currentPage = (int)$_POST['page'];
+}
+
+$itemsPerPage = 12;
+
+// Initialize cart if not exists
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
 }
 
 // Build search query
@@ -635,26 +638,33 @@ if ($categoryResult) {
             const avg = stats.average || 0;
             const total = stats.total || 0;
             
-            console.log('Displaying reviews:', reviews, 'Stats:', stats); // Debug logging
-            
             document.getElementById('avgRating').textContent = avg.toFixed(1);
+            
+            console.log('Displaying reviews:', reviews, 'Stats:', stats); // Debug logging
             
             const reviewsList = document.getElementById('reviewsList');
             if (!reviews || reviews.length === 0) {
                 reviewsList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No reviews yet. Be the first to review!</p>';
             } else {
-                reviewsList.innerHTML = reviews.map(review => `
+                reviewsList.innerHTML = reviews.map(review => {
+                    // Get initials from full name
+                    const names = review.full_name.split(' ');
+                    const initials = names.map(n => n.charAt(0).toUpperCase()).join('');
+                    const maskedName = initials + '***';
+                    
+                    return `
                     <div style="padding: 15px; border-bottom: 1px solid #e8ff47; margin-bottom: 10px;">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                             <div>
-                                <strong style="color: #e8ff47;">${escapeHtml(review.full_name)}</strong>
+                                <strong style="color: #e8ff47;">${escapeHtml(maskedName)}</strong>
                                 <div style="color: #999; font-size: 12px;">${review.created_at}</div>
                             </div>
                             <div style="color: #ffb800; font-size: 16px;">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
                         </div>
                         <p style="color: #f0f0f0; margin: 0;">${escapeHtml(review.review || '')}</p>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             }
         }
         
