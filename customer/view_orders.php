@@ -72,15 +72,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_order'])) {
     }
 }
 
+// Get filter from query parameter
+$filter = isset($_GET['filter']) ? htmlspecialchars($_GET['filter']) : 'all';
+
+// Map filter to status
+$status_map = [
+    'to_pay' => 'Pending',
+    'to_ship' => 'Processing',
+    'to_receive' => 'Shipped',
+    'completed' => 'Delivered',
+    'return_refund' => 'Refunded',
+    'cancelled' => 'Cancelled'
+];
+
 // Get all orders for the user with ratings
-$orders_stmt = $conn->prepare("
+$query = "
     SELECT o.order_id, o.order_date, o.subtotal, o.tax, o.total, o.payment_method, o.order_status,
            COALESCE(r.rating, 0) AS rating, COALESCE(r.review, '') AS review
     FROM orders o
     LEFT JOIN order_ratings r ON r.order_id = o.order_id
-    WHERE o.user_id = ? 
-    ORDER BY o.order_date DESC
-");
+    WHERE o.user_id = ?";
+
+if ($filter !== 'all' && isset($status_map[$filter])) {
+    $query .= " AND o.order_status = '" . $conn->real_escape_string($status_map[$filter]) . "'";
+}
+
+$query .= " ORDER BY o.order_date DESC";
+
+$orders_stmt = $conn->prepare($query);
 $orders_stmt->bind_param("i", $user_id);
 $orders_stmt->execute();
 $orders_result = $orders_stmt->get_result();
@@ -106,6 +125,29 @@ $orders_stmt->close();
             <?php if (!empty($cancel_success)): ?>
                 <div class="success-message"><?php echo htmlspecialchars($cancel_success); ?></div>
             <?php endif; ?>
+
+            <!-- Filter Tabs -->
+            <div style="display: flex; gap: 10px; margin-bottom: 25px; margin-top: 20px; flex-wrap: wrap;">
+                <?php
+                $filters = [
+                    'all' => 'All',
+                    'to_pay' => 'To Pay',
+                    'to_ship' => 'To Ship',
+                    'to_receive' => 'To Receive',
+                    'completed' => 'Completed',
+                    'return_refund' => 'Return/Refund',
+                    'cancelled' => 'Cancelled'
+                ];
+                foreach ($filters as $filter_key => $filter_label):
+                    $isActive = $filter === $filter_key;
+                    $filter_url = 'view_orders.php?filter=' . $filter_key;
+                    $style = $isActive ? 'background-color: #e8ff47; color: #000; font-weight: bold;' : 'background-color: #2a2a32; color: #fff;';
+                ?>
+                    <a href="<?php echo $filter_url; ?>" style="<?php echo $style; ?> padding: 10px 15px; border-radius: 4px; text-decoration: none; border: 1px solid #e8ff47; cursor: pointer; transition: all 0.3s;">
+                        <?php echo $filter_label; ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
 
             <?php if (empty($orders)): ?>
                 <div class="no-orders">

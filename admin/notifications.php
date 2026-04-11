@@ -83,11 +83,7 @@ $unreadCount = getAdminUnreadNotificationsCount($conn);
             <!-- Notifications Header -->
             <div class="notifications-header">
                 <div>
-                    <h2>Notifications
-                        <?php if ($unreadCount > 0): ?>
-                            <span class="notification-badge"><?php echo $unreadCount; ?></span>
-                        <?php endif; ?>
-                    </h2>
+                    <h2>Notifications</h2>
                 </div>
                 <?php if ($unreadCount > 0): ?>
                     <form method="POST" style="margin: 0;">
@@ -111,7 +107,6 @@ $unreadCount = getAdminUnreadNotificationsCount($conn);
                     ?>
                         <li class="notification-item <?php echo $isUnread ? 'unread' : ''; ?>">
                             <div class="notification-content">
-                                <div class="notification-icon"><?php echo $style['icon']; ?></div>
                                 <div class="notification-text">
                                     <p class="notification-title"><?php echo htmlspecialchars($notification['title']); ?></p>
                                     <p class="notification-message"><?php echo htmlspecialchars($notification['message']); ?></p>

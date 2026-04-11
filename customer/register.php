@@ -216,8 +216,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="mobile_number">Mobile Number * <span style="font-size: 12px; color: #999;">(09XXXXXXXXX)</span></label>
-                        <input type="text" id="mobile_number" name="mobile_number" pattern="09\d{9}" maxlength="11" minlength="11" value="<?php echo isset($_POST['mobile_number']) ? htmlspecialchars($_POST['mobile_number']) : ''; ?>" placeholder="09123456789" title="Philippine format: 09XXXXXXXXX (11 digits)" required>
+                        <label for="mobile_number">Mobile Number * </label>
+                        <input type="text" id="mobile_number" name="mobile_number" pattern="09\d{9}" maxlength="11" minlength="11" value="<?php echo isset($_POST['mobile_number']) ? htmlspecialchars($_POST['mobile_number']) : ''; ?>" placeholder="09XXXXXXXX" title="Philippine format: 09XXXXXXXXX (11 digits)" required>
                     </div>
 
                     <div class="form-group">
@@ -235,15 +235,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-group">
                         <label for="password">Password * <span style="font-size: 12px; color: #999;">(8-20 chars)</span></label>
                         <input type="password" id="password" name="password" minlength="8" maxlength="20" placeholder="Uppercase, lowercase, number (no spaces, no :;,'\"/|)" title="8-20 characters with uppercase, lowercase, number" required>
-                        <small style="color: #999; display: block; margin-top: 5px;">
-                            Requirements: 8-20 chars • At least 1 uppercase (A-Z) • At least 1 lowercase (a-z) • At least 1 number (0-9) • No spaces or special chars :;,'""/|
-                        </small>
                     </div>
 
                     <div class="form-group">
                         <label for="confirm_password">Confirm Password *</label>
                         <input type="password" id="confirm_password" name="confirm_password" minlength="8" maxlength="20" placeholder="Re-enter your password" title="Must match the password above" required>
                     </div>
+                </div>
+
+                <div style="color: #999; font-size: 13px; margin-bottom: 15px;">
+                    <strong>Password must have:</strong> 8-20 chars • 1 Uppercase • 1 Lowercase • 1 Number • No spaces or special chars :;,'""/|
                 </div>
 
                 <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">

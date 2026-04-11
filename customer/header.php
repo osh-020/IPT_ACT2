@@ -11,35 +11,6 @@ require_once dirname(__FILE__) . '/../includes/db_connect.php';
     <title>COMPUTRONIUM</title>
     <link rel="icon" type="image/png" href="../includes/website_pic/logo.png">
     <link rel="stylesheet" href="../includes/customer_style.css">
-    <style>
-        .notification-badge {
-            position: relative;
-            display: inline-block;
-        }
-        .notification-dot {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #dc3545;
-            color: white;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .notification-link {
-            color: inherit;
-            text-decoration: none;
-            margin-left: 15px;
-        }
-        .notification-link:hover {
-            color: #007bff;
-        }
-    </style>
 </head>
 <body>
     <header class="navbar">

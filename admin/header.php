@@ -32,7 +32,7 @@ $adminUnreadCount = getAdminUnreadNotificationsCount($conn);
                     <li><a href="dashboard.php" class="admin-nav-link">Dashboard</a></li>
                     <li><a href="manage_product.php" class="admin-nav-link">Products</a></li>
                     <li><a href="view_order.php" class="admin-nav-link">Orders</a></li>
-                    <li><a href="notifications.php" class="admin-nav-link">Notifications<?php if ($adminUnreadCount > 0): ?> <span style="color: #ff6b6b; font-weight: bold;">
+                    <li><a href="notifications.php" class="admin-nav-link">Notifications<?php if ($adminUnreadCount > 0): ?> <span style="background-color: #dc3545; color: white; font-weight: bold; padding: 2px 8px; border-radius: 12px; font-size: 12px; display: inline-block; margin-left: 5px;">
  <?php echo $adminUnreadCount; ?></span><?php endif; ?></a></li>
                 </ul>
             </nav>
