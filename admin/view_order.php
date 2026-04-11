@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     // Update order status
     if ($_POST['action'] === 'update_status') {
-        $allowedStatuses = ['pending', 'preparing', 'shipped', 'completed', 'refunded', 'cancelled'];
+        $allowedStatuses = ['Pending', 'Processing', 'Shipped', 'Completed', 'Refund Requested', 'Refunded', 'Cancelled'];
         $newStatus = $_POST['status'] ?? '';
 
         if (!in_array($newStatus, $allowedStatuses)) {
@@ -58,15 +58,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     $notificationTitle = '';
                     $notificationMessage = '';
                     
-                    if ($newStatus === 'completed') {
+                    if ($newStatus === 'Completed') {
                         $notificationType = 'shipped';
                         $notificationTitle = "Order #$orderId Completed";
                         $notificationMessage = "Your order #$orderId has been completed and is ready for pickup or delivery.";
-                    } elseif ($newStatus === 'refunded') {
+                    } elseif ($newStatus === 'Refunded') {
                         $notificationType = 'cancelled';
                         $notificationTitle = "Order #$orderId Refunded";
                         $notificationMessage = "Your order #$orderId has been refunded. The refund will be processed within 5-7 business days.";
-                    } elseif ($newStatus === 'cancelled') {
+                    } elseif ($newStatus === 'Refund Requested') {
+                        $notificationType = 'refund';
+                        $notificationTitle = "Refund Request Received";
+                        $notificationMessage = "We received your refund request for order #$orderId. Our team is reviewing it.";
+                    } elseif ($newStatus === 'Cancelled') {
                         $notificationType = 'cancelled';
                         $notificationTitle = "Order #$orderId Cancelled";
                         $notificationMessage = "Your order #$orderId has been cancelled.";
@@ -82,15 +86,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $adminNotifTitle = '';
                 $adminNotifMessage = '';
                 
-                if ($newStatus === 'pending') {
+                if ($newStatus === 'Pending') {
                     $adminNotifType = 'order';
                     $adminNotifTitle = "New Order #$orderId";
                     $adminNotifMessage = "A new order has been placed. Click to view details.";
-                } elseif ($newStatus === 'refunded') {
+                } elseif ($newStatus === 'Refunded') {
                     $adminNotifType = 'refund';
                     $adminNotifTitle = "Order #$orderId Refunded";
                     $adminNotifMessage = "Order #$orderId has been marked as refunded.";
-                } elseif ($newStatus === 'cancelled') {
+                } elseif ($newStatus === 'Cancelled') {
                     $adminNotifType = 'cancel';
                     $adminNotifTitle = "Order #$orderId Cancelled";
                     $adminNotifMessage = "Order #$orderId has been cancelled.";
@@ -185,12 +189,12 @@ if ($countResult) {
 // Helpers
 function statusBadge($status) {
     $map = [
-        'pending'   => ['label' => 'Pending',   'class' => 'badge-pending'],
-        'preparing' => ['label' => 'Preparing', 'class' => 'badge-preparing'],
-        'shipped'   => ['label' => 'Shipped',   'class' => 'badge-shipped'],
-        'completed' => ['label' => 'Completed', 'class' => 'badge-completed'],
-        'refunded'  => ['label' => 'Refunded',  'class' => 'badge-refunded'],
-        'cancelled' => ['label' => 'Cancelled', 'class' => 'badge-cancelled'],
+        'Pending'   => ['label' => 'Pending',   'class' => 'badge-pending'],
+        'Processing' => ['label' => 'Processing', 'class' => 'badge-preparing'],
+        'Shipped'   => ['label' => 'Shipped',   'class' => 'badge-shipped'],
+        'Completed' => ['label' => 'Completed', 'class' => 'badge-completed'],
+        'Refunded'  => ['label' => 'Refunded',  'class' => 'badge-refunded'],
+        'Cancelled' => ['label' => 'Cancelled', 'class' => 'badge-cancelled'],
     ];
     $s = $map[$status] ?? ['label' => ucfirst($status), 'class' => 'badge-pending'];
     return "<span class=\"status-badge {$s['class']}\">{$s['label']}</span>";
@@ -213,12 +217,12 @@ function statusBadge($status) {
         <?php
         $allStatuses = [
             ''          => 'All Orders',
-            'pending'   => 'Pending',
-            'preparing' => 'Preparing',
-            'shipped'   => 'Shipped',
-            'completed' => 'Completed',
-            'refunded'  => 'Refunded',
-            'cancelled' => 'Cancelled',
+            'Pending'   => 'Pending',
+            'Processing' => 'Processing',
+            'Shipped'   => 'Shipped',
+            'Completed' => 'Completed',
+            'Refunded'  => 'Refunded',
+            'Cancelled' => 'Cancelled',
         ];
         $totalAll = array_sum($statusCounts);
         foreach ($allStatuses as $key => $label):
@@ -269,7 +273,6 @@ function statusBadge($status) {
                         <th>Date</th>
                         <th>Status</th>
                         <th>Update Status</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -325,38 +328,14 @@ function statusBadge($status) {
                                 <input type="hidden" name="action"   value="update_status">
                                 <input type="hidden" name="order_id" value="<?php echo intval($order['order_id']); ?>">
                                 <select name="status">
-                                    <?php foreach (['pending','preparing','shipped','completed','refunded','cancelled'] as $s): ?>
+                                    <?php foreach (['Pending','Processing','Shipped','Completed','Refunded','Cancelled'] as $s): ?>
                                         <option value="<?php echo $s; ?>" <?php echo $order['order_status'] === $s ? 'selected' : ''; ?>>
-                                            <?php echo ucfirst($s); ?>
+                                            <?php echo $s; ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                                 <button type="submit" class="btn-status-update">Save</button>
                             </form>
-                        </td>
-
-                        <!-- Quick Actions -->
-                        <td>
-                            <div class="actions-cell">
-                                <?php if (!in_array($order['order_status'], ['refunded','cancelled'])): ?>
-                                    <form method="POST" onsubmit="return confirm('Mark Order #<?php echo intval($order['order_id']); ?> as Refunded?')">
-                                        <input type="hidden" name="action"   value="update_status">
-                                        <input type="hidden" name="order_id" value="<?php echo intval($order['order_id']); ?>">
-                                        <input type="hidden" name="status"   value="refunded">
-                                        <button type="submit" class="btn-quick btn-refund">Refund</button>
-                                    </form>
-                                <?php endif; ?>
-
-                                <?php if (!in_array($order['order_status'], ['completed','cancelled','refunded'])): ?>
-                                    <form method="POST" onsubmit="return confirm('Mark Order #<?php echo intval($order['order_id']); ?> as Completed?')">
-                                        <input type="hidden" name="action"   value="update_status">
-                                        <input type="hidden" name="order_id" value="<?php echo intval($order['order_id']); ?>">
-                                        <input type="hidden" name="status"   value="completed">
-                                        <button type="submit" class="btn-quick btn-complete">Complete</button>
-                                    </form>
-                                <?php endif; ?>
-
-                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>

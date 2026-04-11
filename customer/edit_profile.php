@@ -71,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             $update_stmt->close();
         }
-        $email_check->close();
     }
 }
 ?>

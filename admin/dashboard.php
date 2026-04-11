@@ -67,18 +67,18 @@ $adminUnreadCount = getAdminUnreadNotificationsCount($conn);
                 $orderCount = 0;
                 $totalRevenue = 0;
 
-                if ($result = $conn->query($productsQuery)) {
-                    $row = $result->fetch_assoc();
+                if ($result = mysqli_query($conn, $productsQuery)) {
+                    $row = mysqli_fetch_assoc($result);
                     $productCount = $row['count'];
                 }
 
-                if ($result = $conn->query($ordersQuery)) {
-                    $row = $result->fetch_assoc();
+                if ($result = mysqli_query($conn, $ordersQuery)) {
+                    $row = mysqli_fetch_assoc($result);
                     $orderCount = $row['count'];
                 }
 
-                if ($result = $conn->query($totalRevenueQuery)) {
-                    $row = $result->fetch_assoc();
+                if ($result = mysqli_query($conn, $totalRevenueQuery)) {
+                    $row = mysqli_fetch_assoc($result);
                     $totalRevenue = $row['total'] ? number_format($row['total'], 2) : '0.00';
                 }
                 ?>
@@ -121,8 +121,8 @@ $adminUnreadCount = getAdminUnreadNotificationsCount($conn);
                         <p class="stat-number">
                             <?php
                             $catQuery = "SELECT COUNT(DISTINCT category) as count FROM products";
-                            if ($result = $conn->query($catQuery)) {
-                                $row = $result->fetch_assoc();
+                            if ($result = mysqli_query($conn, $catQuery)) {
+                                $row = mysqli_fetch_assoc($result);
                                 echo $row['count'];
                             }
                             ?>

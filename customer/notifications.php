@@ -156,8 +156,7 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                     $time_text = formatNotificationTime($notif['created_at']);
                     $notification_link = $notif['order_id'] ? 'view_orders.php?order_id=' . $notif['order_id'] : '#';
                 ?>
-                    <a href="<?php echo $notification_link; ?>" style="text-decoration: none; color: inherit; display: block;">
-                        <div style="padding: 20px; border-bottom: 1px solid #ddd; background-color: #2a2a32; display: flex; justify-content: space-between; align-items: flex-start; cursor: <?php echo $notif['order_id'] ? 'pointer' : 'default'; ?>; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#333';" onmouseout="this.style.backgroundColor='#2a2a32';">
+                    <div style="padding: 20px; border-bottom: 1px solid #ddd; background-color: #2a2a32; display: flex; justify-content: space-between; align-items: flex-start; cursor: <?php echo $notif['order_id'] ? 'pointer' : 'default'; ?>; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#333';" onmouseout="this.style.backgroundColor='#2a2a32';" onclick="handleNotificationClick(<?php echo $notif['notification_id']; ?>, '<?php echo $notification_link; ?>', <?php echo $notif['is_read'] ? 'true' : 'false'; ?>)">
                             <div style="flex: 1;">
                                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                                     <h3 style="margin: 0; color: <?php echo !$notif['is_read'] ? '#fff' : '#eee'; ?>;">
@@ -177,7 +176,7 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                                     <?php endif; ?>
                                 </p>
                             </div>
-                            <div style="margin-left: 20px; display: flex; gap: 10px;" onclick="event.preventDefault(); event.stopPropagation();">
+                            <div style="margin-left: 20px; display: flex; gap: 10px;" onclick="event.stopPropagation();">
                                 <?php if (!$notif['is_read']): ?>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="notification_id" value="<?php echo $notif['notification_id']; ?>">
@@ -194,7 +193,6 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
                                 </form>
                             </div>
                         </div>
-                    </a>
                 <?php endforeach; ?>
             </div>
 
@@ -225,6 +223,35 @@ $unread_count = getUnreadNotificationsCount($user_id, $conn);
         <?php endif; ?>
     </div>
 </main>
+
+<script>
+function handleNotificationClick(notificationId, notificationLink, isRead) {
+    // If already read or no link, just navigate
+    if (isRead || notificationLink === '#') {
+        if (notificationLink !== '#') {
+            window.location.href = notificationLink;
+        }
+        return;
+    }
+
+    // If unread, mark as read first via AJAX, then navigate
+    const formData = new FormData();
+    formData.append('mark_read', '1');
+    formData.append('notification_id', notificationId);
+
+    fetch('notifications.php', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        // After marking as read, navigate to the order
+        window.location.href = notificationLink;
+    }).catch(error => {
+        console.error('Error:', error);
+        // Still navigate even if marking fails
+        window.location.href = notificationLink;
+    });
+}
+</script>
 
 <?php include 'footer.php'; ?>
 

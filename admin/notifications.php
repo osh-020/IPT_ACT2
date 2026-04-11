@@ -104,8 +104,9 @@ $unreadCount = getAdminUnreadNotificationsCount($conn);
                     <?php foreach ($notifications as $notification): 
                         $style = getAdminNotificationStyle($notification['type']);
                         $isUnread = $notification['is_read'] == 0;
+                        $viewOrderUrl = $notification['order_id'] ? 'view_order.php?search=' . $notification['order_id'] : '#';
                     ?>
-                        <li class="notification-item <?php echo $isUnread ? 'unread' : ''; ?>">
+                        <li class="notification-item <?php echo $isUnread ? 'unread' : ''; ?>" onclick="handleNotificationClick(<?php echo $notification['notification_id']; ?>, '<?php echo $viewOrderUrl; ?>', <?php echo $isUnread ? 'false' : 'true'; ?>)" style="cursor: pointer;">
                             <div class="notification-content">
                                 <div class="notification-text">
                                     <p class="notification-title"><?php echo htmlspecialchars($notification['title']); ?></p>
@@ -119,17 +120,7 @@ $unreadCount = getAdminUnreadNotificationsCount($conn);
                                     </div>
                                 </div>
                             </div>
-                            <div class="notification-actions">
-                                <?php if ($notification['order_id']): ?>
-                                    <a href="view_order.php?search=<?php echo $notification['order_id']; ?>" class="action-btn btn-view-order">View Order</a>
-                                <?php endif; ?>
-                                <?php if ($isUnread): ?>
-                                    <form method="POST" style="display: inline;">
-                                        <input type="hidden" name="action" value="mark_read">
-                                        <input type="hidden" name="notification_id" value="<?php echo $notification['notification_id']; ?>">
-                                        <button type="submit" class="action-btn btn-mark-read">Mark as Read</button>
-                                    </form>
-                                <?php endif; ?>
+                            <div class="notification-actions" onclick="event.stopPropagation();">
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="notification_id" value="<?php echo $notification['notification_id']; ?>">
@@ -177,5 +168,35 @@ $unreadCount = getAdminUnreadNotificationsCount($conn);
             <?php endif; ?>
         </div>
     </main>
+
+<script>
+function handleNotificationClick(notificationId, viewOrderUrl, isRead) {
+    // If already read or no order link, just navigate
+    if (isRead || viewOrderUrl === '#') {
+        if (viewOrderUrl !== '#') {
+            window.location.href = viewOrderUrl;
+        }
+        return;
+    }
+
+    // If unread, mark as read first via AJAX, then navigate
+    const formData = new FormData();
+    formData.append('action', 'mark_read');
+    formData.append('notification_id', notificationId);
+
+    fetch('notifications.php', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        // After marking as read, navigate to the order
+        window.location.href = viewOrderUrl;
+    }).catch(error => {
+        console.error('Error:', error);
+        // Still navigate even if marking fails
+        window.location.href = viewOrderUrl;
+    });
+}
+</script>
+
 </body>
 </html>

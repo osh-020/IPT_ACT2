@@ -2,6 +2,7 @@
 session_start();
 include '../includes/db_connect.php';
 require_once '../includes/customer_notifications.php';
+require_once '../includes/admin_notifications.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -10,6 +11,57 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+
+// Handle refund request
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['request_refund'])) {
+    $order_id = intval($_POST['order_id']);
+    
+    // Verify order belongs to user and is delivered
+    $verify_stmt = $conn->prepare("SELECT order_status, total FROM orders WHERE order_id = ? AND user_id = ?");
+    $verify_stmt->bind_param("ii", $order_id, $user_id);
+    $verify_stmt->execute();
+    $verify_result = $verify_stmt->get_result();
+    $order_check = $verify_result->fetch_assoc();
+    $verify_stmt->close();
+    
+    if ($order_check && $order_check['order_status'] === 'Completed') {
+        // Update order status to indicate refund requested
+        $update_stmt = $conn->prepare("UPDATE orders SET order_status = 'Refund Requested' WHERE order_id = ?");
+        $update_stmt->bind_param("i", $order_id);
+        
+        if ($update_stmt->execute()) {
+            // Get user info for notification
+            $user_stmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ?");
+            $user_stmt->bind_param("i", $user_id);
+            $user_stmt->execute();
+            $user_result = $user_stmt->get_result();
+            $user_info = $user_result->fetch_assoc();
+            $user_stmt->close();
+            
+            // Create customer notification
+            createNotification(
+                $user_id,
+                'refund',
+                'Refund Request Submitted',
+                'Your refund request for order #' . str_pad($order_id, 6, '0', STR_PAD_LEFT) . ' has been submitted. Total: ₱' . number_format($order_check['total'], 2),
+                $conn,
+                $order_id
+            );
+            
+            // Create admin notification
+            createAdminNotification(
+                $order_id,
+                'refund',
+                'Refund Request - Order #' . str_pad($order_id, 6, '0', STR_PAD_LEFT),
+                'Customer ' . htmlspecialchars($user_info['full_name']) . ' has requested a refund for order #' . str_pad($order_id, 6, '0', STR_PAD_LEFT) . ' (₱' . number_format($order_check['total'], 2) . ')',
+                $conn
+            );
+            
+            $refund_success = "Refund request submitted successfully. Admin will review and process your request.";
+        }
+        $update_stmt->close();
+    }
+}
 
 // Handle order rating submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_rating'])) {
@@ -80,8 +132,8 @@ $status_map = [
     'to_pay' => 'Pending',
     'to_ship' => 'Processing',
     'to_receive' => 'Shipped',
-    'completed' => 'Delivered',
-    'return_refund' => 'Refunded',
+    'completed' => 'Completed',
+    'return_refund' => ['Refunded', 'Refund Requested'],
     'cancelled' => 'Cancelled'
 ];
 
@@ -94,7 +146,14 @@ $query = "
     WHERE o.user_id = ?";
 
 if ($filter !== 'all' && isset($status_map[$filter])) {
-    $query .= " AND o.order_status = '" . $conn->real_escape_string($status_map[$filter]) . "'";
+    $status_value = $status_map[$filter];
+    if (is_array($status_value)) {
+        // Handle multiple statuses for return_refund
+        $statuses = array_map(function($s) use ($conn) { return "'" . $conn->real_escape_string($s) . "'"; }, $status_value);
+        $query .= " AND o.order_status IN (" . implode(',', $statuses) . ")";
+    } else {
+        $query .= " AND o.order_status = '" . $conn->real_escape_string($status_value) . "'";
+    }
 }
 
 $query .= " ORDER BY o.order_date DESC";
@@ -124,6 +183,10 @@ $orders_stmt->close();
 
             <?php if (!empty($cancel_success)): ?>
                 <div class="success-message"><?php echo htmlspecialchars($cancel_success); ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($refund_success)): ?>
+                <div class="success-message"><?php echo htmlspecialchars($refund_success); ?></div>
             <?php endif; ?>
 
             <!-- Filter Tabs -->
@@ -233,8 +296,15 @@ $orders_stmt->close();
                                     <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
                                     <button type="submit" name="cancel_order" class="btn-cancel">Cancel Order</button>
                                 </form>
+                            <?php elseif ($order['order_status'] === 'Completed'): ?>
+                                <form method="POST" style="display: inline;" onsubmit="return confirm('Request a refund for this order?');">
+                                    <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
+                                    <button type="submit" name="request_refund" class="btn-refund" style="background-color: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 0; cursor: pointer;">Request Refund</button>
+                                </form>
                             <?php elseif ($order['order_status'] === 'Cancelled'): ?>
                                 <span style="color: #dc3545; font-weight: 600;">Order Cancelled</span>
+                            <?php elseif ($order['order_status'] === 'Refund Requested'): ?>
+                                <span style="color: #ff9800; font-weight: 600;">Refund Request Pending</span>
                             <?php else: ?>
                                 <span style="color: #999; font-size: 14px;">Cannot cancel - Order is <?php echo $order['order_status']; ?></span>
                             <?php endif; ?>

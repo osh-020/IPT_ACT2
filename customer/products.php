@@ -93,6 +93,50 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['add_to_cart'])) {
     exit;
 }
 
+// Handle Checkout (Buy Now)
+if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['checkout'])) {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: login.php?redirect=checkout.php");
+        exit;
+    }
+    
+    $product_id = intval($_POST['product_id']);
+    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
+    
+    if ($quantity > 0) {
+        // Validate product exists
+        $stmt = $conn->prepare("SELECT id, name, price, stock FROM products WHERE id = ?");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $product = $result->fetch_assoc();
+        $stmt->close();
+        
+        if ($product && $product['stock'] > 0 && $quantity <= $product['stock']) {
+            // Add to cart
+            if (isset($_SESSION['cart'][$product_id])) {
+                $_SESSION['cart'][$product_id]['quantity'] += $quantity;
+            } else {
+                $_SESSION['cart'][$product_id] = [
+                    'name' => $product['name'],
+                    'price' => $product['price'],
+                    'quantity' => $quantity
+                ];
+            }
+            // Mark as selected for checkout
+            if (!isset($_SESSION['cart_selected'])) {
+                $_SESSION['cart_selected'] = [];
+            }
+            $_SESSION['cart_selected'][$product_id] = true;
+        }
+    }
+    
+    // Redirect to checkout
+    header("Location: checkout.php");
+    exit;
+}
+
 // Build search query
 $query = "SELECT id, name, description, brand, category, price, stock, image FROM products WHERE stock > 0";
 
@@ -272,6 +316,7 @@ if ($categoryResult) {
                         
                         <div class="modal-actions">
                             <button type="submit" name="add_to_cart" value="1" class="btn btn-add" style="padding: 15px 30px; background-color: #e8ff47; color: #000; font-weight: 600; border: none; cursor: pointer; border-radius: 0; flex: 1; font-size: 16px;">Add to Cart</button>
+                            <button type="submit" name="checkout" value="1" class="btn btn-checkout" style="padding: 15px 30px; background-color: #28a745; color: white; font-weight: 600; border: none; cursor: pointer; border-radius: 0; flex: 1; font-size: 16px;">Buy Now</button>
                             <button type="button" onclick="closeProductModal()" class="btn btn-cancel" style="padding: 15px 30px; background-color: #dc3545; color: white; font-weight: 600; border: none; cursor: pointer; border-radius: 0; font-size: 16px;">Close</button>
                         </div>
                     </form>
