@@ -155,11 +155,12 @@ if ($categoryResult) {
                                 Stock: <strong><?php echo intval($product['stock']); ?></strong> units
                             </div>
 
-                            <div class="product-actions">
+                           <div class="product-actions">
                                 <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="btn-edit"> Edit</a>
-                                <form method="POST" style="flex: 1;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                <form method="POST" style="flex: 1; display:flex; flex-direction:column; gap:6px;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                    <button type="button" class="btn-reviews" style="width:100%;" onclick="viewReviews(<?php echo $product['id']; ?>, '<?php echo htmlspecialchars($product['name'], ENT_QUOTES); ?>')">⭐ Reviews</button>
                                     <input type="hidden" name="delete_id" value="<?php echo $product['id']; ?>">
-                                    <button type="submit" class="btn-delete" style="width: 100%;">Delete</button>
+                                    <button type="submit" class="btn-delete" style="width:100%;">Delete</button>
                                 </form>
                             </div>
                         </div>
@@ -173,6 +174,65 @@ if ($categoryResult) {
         <?php endif; ?>
 
     </div>
+
+            <!-- Reviews Modal -->
+<div id="reviewsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; overflow-y:auto;">
+    <div style="background:#1a1a2e; margin:50px auto; padding:30px; max-width:650px; border-radius:12px; border:1px solid #333;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 id="modalTitle" style="color:#e8ff47; margin:0;">Product Reviews</h3>
+            <button onclick="closeReviews()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">✕</button>
+        </div>
+        <div id="reviewsContent" style="color:#ccc;">Loading...</div>
+    </div>
+</div>
+
+<!-- Reviews fetch script -->
+<script>
+function viewReviews(productId, productName) {
+    document.getElementById('modalTitle').textContent = '⭐ Reviews: ' + productName;
+    document.getElementById('reviewsContent').innerHTML = 'Loading...';
+    document.getElementById('reviewsModal').style.display = 'block';
+
+    fetch('get_product_reviews.php?product_id=' + productId)
+        .then(res => res.json())
+        .then(data => {
+            if (data.length === 0) {
+                document.getElementById('reviewsContent').innerHTML = '<p style="text-align:center; color:#888;">No reviews yet for this product.</p>';
+                return;
+            }
+            let avg = (data.reduce((s, r) => s + r.rating, 0) / data.length).toFixed(1);
+            let html = `<div style="margin-bottom:15px; padding:10px; background:#0d0d1a; border-radius:8px; text-align:center;">
+                            <span style="font-size:28px; color:#e8ff47;">${avg} ⭐</span>
+                            <span style="color:#888; margin-left:8px;">(${data.length} review${data.length > 1 ? 's' : ''})</span>
+                        </div>`;
+            data.forEach(r => {
+                let stars = '⭐'.repeat(r.rating);
+                let date = new Date(r.created_at).toLocaleDateString('en-PH', {year:'numeric', month:'short', day:'numeric'});
+                html += `<div style="border-bottom:1px solid #333; padding:12px 0;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                <strong style="color:#fff;">${r.full_name}</strong>
+                                <span style="color:#888; font-size:13px;">${date}</span>
+                            </div>
+                            <div style="margin-bottom:6px;">${stars}</div>
+                            <div style="color:#ccc;">${r.review ? r.review : '<em style="color:#555;">No comment</em>'}</div>
+                        </div>`;
+            });
+            document.getElementById('reviewsContent').innerHTML = html;
+        })
+        .catch(() => {
+            document.getElementById('reviewsContent').innerHTML = '<p style="color:red;">Failed to load reviews.</p>';
+        });
+}
+
+function closeReviews() {
+    document.getElementById('reviewsModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.getElementById('reviewsModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReviews();
+});
+</script>
 
 </body>
 </html>

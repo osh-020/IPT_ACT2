@@ -1399,3 +1399,18 @@ main {
     .status-select-form { flex-direction: column; }
 }
 
+.btn-reviews {
+    background: #2a2a4a;
+    color: #e8ff47;
+    border: 1px solid #e8ff47;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+    margin-top: 6px;
+}
+.btn-reviews:hover {
+    background: #e8ff47;
+    color: #000;
+}
