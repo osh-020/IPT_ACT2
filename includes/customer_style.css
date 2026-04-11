@@ -1311,6 +1311,7 @@ main {
     border: none;
     border-radius: 0;
     cursor: pointer;
+    height: fit-content;
 }
 
 .btn-large {

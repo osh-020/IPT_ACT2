@@ -461,8 +461,8 @@ if ($categoryResult) {
                         
                         <div class="modal-actions">
                             <button type="submit" name="add_to_cart" value="1" class="btn btn-add" style="padding: 15px 30px; background-color: #e8ff47; color: #000; font-weight: 600; border: none; cursor: pointer; border-radius: 0; flex: 1; font-size: 16px;">Add to Cart</button>
-                            <button type="submit" name="checkout" value="1" class="btn btn-checkout" style="padding: 15px 30px; background-color: #28a745; color: white; font-weight: 600; border: none; cursor: pointer; border-radius: 0; flex: 1; font-size: 16px;">Buy Now</button>
-                            <button type="button" onclick="closeProductModal()" class="btn btn-cancel" style="padding: 15px 30px; background-color: #dc3545; color: white; font-weight: 600; border: none; cursor: pointer; border-radius: 0; font-size: 16px;">Close</button>
+                            <button type="submit" name="checkout" value="1" class="btn btn-checkout" style=" height: fit-content; padding: 15px 30px; background-color: green; color: #000; font-weight: 600; border: none; cursor: pointer; border-radius: 0; flex: 1; font-size: 16px;">Buy Now</button>
+                            <button type="button" onclick="closeProductModal()" class="btn btn-cancel" style="padding: 15px 30px; background-color: red; color: #000; font-weight: 600; border: none; cursor: pointer; border-radius: 0; flex: 1; font-size: 16px;">Close</button>
                         </div>
                     </form>
                 </div>
