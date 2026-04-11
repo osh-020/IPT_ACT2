@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a href="dashboard.php" class="btn btn-secondary" style="text-align: center; text-decoration: none; line-height: 1.5;">Cancel</a>
+                <button type="button" class="btn btn-secondary" onclick="window.history.back();">Cancel</button>
             </div>
         </form>
     </div>

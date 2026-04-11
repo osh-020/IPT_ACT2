@@ -68,7 +68,7 @@ require_once dirname(__FILE__) . '/../includes/db_connect.php';
                     <?php
                     if (isset($_SESSION['user_id'])) {
                         echo "<span class='user-name'>Hi, " . htmlspecialchars($_SESSION['username']) . "</span>";
-                        echo "<a href='dashboard.php' class='user-link'>Profile</a>";
+                        echo "<a href='profile.php' class='user-link'>Profile</a>";
                     } else {
                         echo "<a href='login.php' class='user-link'>Login</a>";
                         echo "<a href='register.php' class='user-link'>Register</a>";
